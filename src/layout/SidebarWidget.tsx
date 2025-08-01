@@ -1,10 +1,9 @@
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
 import Button from "../components/ui/button/Button";
-import { toast } from "sonner";
 
 export default function SidebarWidget() {
-	const { user, logout } = useAuth();
+	const { logout } = useAuth();
 	const navigate = useNavigate();
 
 	// Handle logout and redirect to home page

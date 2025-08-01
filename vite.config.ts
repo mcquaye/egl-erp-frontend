@@ -25,6 +25,14 @@ export default defineConfig({
 			usePolling: true, // Helps with file watching
 			interval: 1000, // Poll every second
 		},
+		proxy: {
+			"/api": {
+				target: "https://api.electrolandgh.com",
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api/, ""),
+				secure: true,
+			},
+		},
 	},
 	preview: {
 		port: 5050,

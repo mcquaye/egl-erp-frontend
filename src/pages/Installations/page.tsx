@@ -1,15 +1,15 @@
-import React from "react";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
+import InstallationSearch from "../../components/installation/InstallationSearch";
 
-const InstallationsPage = () => {
+export default function InstallationsPage() {
 	return (
 		<>
 			<PageMeta title='Installations' description='ERP - Admin - Dashboard' />
 			<PageBreadcrumb pageTitle='My Installations' />
-			<div className='rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03] lg:p-6'></div>
+			<div className='space-y-6'>
+				<InstallationSearch />
+			</div>
 		</>
 	);
-};
-
-export default InstallationsPage;
+}

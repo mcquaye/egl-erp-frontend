@@ -1,23 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { Toaster } from "sonner";
 import SignIn from "./pages/AuthPages/SignIn";
-import SignUp from "./pages/AuthPages/SignUp";
 import ResetPassword from "./pages/AuthPages/ForgotPasswordPage";
 import NotFound from "./pages/Errors/NotFound";
 import AccessDenied from "./pages/Errors/AccessDenied";
 import UserProfiles from "./pages/UserProfiles";
 import Installations from "./pages/Installations/page";
-import Videos from "./pages/UiElements/Videos";
-import Images from "./pages/UiElements/Images";
-import Alerts from "./pages/UiElements/Alerts";
-import Badges from "./pages/UiElements/Badges";
-import Avatars from "./pages/UiElements/Avatars";
-import Buttons from "./pages/UiElements/Buttons";
-import LineChart from "./pages/Charts/LineChart";
-import BarChart from "./pages/Charts/BarChart";
-import Calendar from "./pages/Calendar";
-import BasicTables from "./pages/Tables/BasicTables";
-import FormElements from "./pages/Forms/FormElements";
 import Blank from "./pages/Blank";
 import AuthDemo from "./pages/AuthDemo";
 import AppLayout from "./layout/DashboardLayout";
@@ -27,6 +15,17 @@ import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import PublicRoute from "./components/auth/PublicRoute";
 import RoleGuard from "./components/auth/RoleGuard";
+import ScanPage from "./pages/Scan/page";
+import CreateJobCard from "./pages/JobCards/CreateJobCard";
+import AllJobCards from "./pages/JobCards/AllJobCards";
+import MyJobCards from "./pages/JobCards/MyJobCards";
+import ViewJobCard from "./pages/JobCards/ViewJobCard";
+import AssignJobCard from "./pages/JobCards/AssignJobCard";
+import EditJobCard from "./pages/JobCards/EditJobCard";
+import UsersList from "./components/users/UsersList";
+import CreateUser from "./components/users/CreateUser";
+import EditUser from "./components/users/EditUser";
+import ChangePassword from "./components/users/ChangePassword";
 
 export default function App() {
 	return (
@@ -69,29 +68,288 @@ export default function App() {
 							</ProtectedRoute>
 						}>
 						<Route index element={<Home />} />
-						<Route path='profile' element={<UserProfiles />} />
+
+						{/* User Management - Admin Only */}
 						<Route
-							path='settings'
+							path='users'
 							element={
 								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
-									<UserProfiles />
+									<UsersList />
 								</RoleGuard>
 							}
 						/>
-						<Route path='installations' element={<Installations />} />
-						<Route path='my-reports' element={<Blank />} />
 						<Route
-							path='all-reports'
+							path='users/create'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<CreateUser />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='users/edit/:id'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<EditUser />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='change-password'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager", "user"]} fallback={<AccessDenied />}>
+									<ChangePassword />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='users/roles'
 							element={
 								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
 									<Blank />
 								</RoleGuard>
 							}
 						/>
-						<Route path='create' element={<Blank />} />
-						<Route path='scan' element={<Blank />} />
-						<Route path='jobs' element={<Blank />} />
-						<Route path='auth-demo' element={<AuthDemo />} />
+
+						{/* Job Cards - Role-based access */}
+						<Route
+							path='job-cards'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<AllJobCards />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/all'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<AllJobCards />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/create'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager"]} fallback={<AccessDenied />}>
+									<CreateJobCard />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/assign/:id'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<AssignJobCard />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/edit/:id'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<EditJobCard />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/my-jobs'
+							element={
+								<RoleGuard allowedRoles={["manager"]} fallback={<AccessDenied />}>
+									<MyJobCards />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/view'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager", "user"]} fallback={<AccessDenied />}>
+									<ViewJobCard />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='job-cards/view/:id'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager", "user"]} fallback={<AccessDenied />}>
+									<ViewJobCard />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Scan - Admin and Manager access */}
+						<Route
+							path='scan/qr-code'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='scan/manual'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager"]} fallback={<AccessDenied />}>
+									<ScanPage />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='scan/batch'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Reports - Role-based access */}
+						<Route path='reports/my-reports' element={<Blank />} />
+						<Route
+							path='reports/job-reports'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='reports/all-reports'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='reports/team-reports'
+							element={
+								<RoleGuard allowedRoles={["manager"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Downloads - Role-based access */}
+						<Route
+							path='downloads/job-cards'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='downloads/my-jobs'
+							element={
+								<RoleGuard allowedRoles={["manager"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='downloads/viewed-card'
+							element={
+								<RoleGuard allowedRoles={["user"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Messages - Admin and Manager */}
+						<Route
+							path='messages/to-users'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='messages/to-managers'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='messages/broadcast'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='messages/team'
+							element={
+								<RoleGuard allowedRoles={["manager"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Settings - Admin and Manager */}
+						<Route
+							path='settings/system'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='settings/profile'
+							element={
+								<RoleGuard allowedRoles={["admin", "manager"]} fallback={<AccessDenied />}>
+									<UserProfiles />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='settings/permissions'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Support */}
+						<Route path='help' element={<Blank />} />
+						<Route path='chat' element={<Blank />} />
+						<Route path='contact' element={<Blank />} />
+						<Route
+							path='status'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Development - Admin Only */}
+						<Route
+							path='auth-demo'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<AuthDemo />
+								</RoleGuard>
+							}
+						/>
+						<Route
+							path='test'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<Blank />
+								</RoleGuard>
+							}
+						/>
+
+						{/* Legacy routes */}
+						<Route path='installations' element={<Installations />} />
+						<Route path='profile' element={<UserProfiles />} />
 					</Route>
 
 					<Route

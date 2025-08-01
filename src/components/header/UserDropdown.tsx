@@ -3,7 +3,6 @@ import { DropdownItem } from "../ui/dropdown/DropdownItem";
 import { Dropdown } from "../ui/dropdown/Dropdown";
 import { useNavigate } from "react-router";
 import { useAuth } from "../../context/AuthContext";
-import { toast } from "sonner";
 
 export default function UserDropdown() {
 	const [isOpen, setIsOpen] = useState(false);

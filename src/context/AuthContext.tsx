@@ -1,29 +1,36 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { jwtDecode } from "jwt-decode";
+import { VerificationStatus } from "../types/user-types";
+import { useLoginMutation, useLogoutMutation } from "../redux/api/authApi";
 
-interface User {
-	id: string;
+// Simplified user interface for auth context
+interface AuthUser {
+	id: number;
 	email: string;
 	name: string;
-	role: "admin" | "user" | "manager";
+	phoneNumber?: string | null;
+	role: string;
+	verificationStatus?: VerificationStatus;
+	createdAt?: Date;
+	updatedAt?: Date;
 }
 
 interface JWTPayload {
-	id: string;
+	userId: number;
 	email: string;
 	name: string;
-	role: "admin" | "user" | "manager";
+	phoneNumber?: string | null;
+	role: string;
 	exp: number;
 	iat: number;
 }
 
 interface AuthContextType {
-	user: User | null;
+	user: AuthUser | null;
 	isLoading: boolean;
 	isAuthenticated: boolean;
 	login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
-	logout: () => void;
+	logout: () => Promise<void>;
 	register: (
 		email: string,
 		password: string,
@@ -53,28 +60,18 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-	const [user, setUser] = useState<User | null>(null);
+	const [user, setUser] = useState<AuthUser | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
+	// RTK Query hooks
+	const [loginMutation] = useLoginMutation();
+	const [logoutMutation] = useLogoutMutation();
+
 	// Role-based permissions mapping
-	const rolePermissions = {
+	const rolePermissions: Record<string, string[]> = {
 		admin: ["read", "write", "delete", "manage_users", "view_all_reports", "manage_settings"],
 		manager: ["read", "write", "view_reports", "manage_team"],
 		user: ["read", "view_own_reports"],
-	};
-
-	// Utility function to create mock JWT token
-	const createMockJWT = (userData: User): string => {
-		const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-		const payload = btoa(
-			JSON.stringify({
-				...userData,
-				exp: Math.floor(Date.now() / 1000) + 24 * 60 * 60, // 24 hours
-				iat: Math.floor(Date.now() / 1000),
-			})
-		);
-		const signature = btoa("mock_signature");
-		return `${header}.${payload}.${signature}`;
 	};
 
 	// Utility function to decode JWT token
@@ -100,16 +97,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		const initializeAuth = async () => {
 			try {
 				const token = localStorage.getItem("auth_token");
+				const userData = localStorage.getItem("user_data");
 
-				if (token) {
+				if (token && userData) {
+					// Check if token is still valid
 					const decoded = decodeJWT(token);
 					if (decoded) {
-						setUser({
-							id: decoded.id,
-							email: decoded.email,
-							name: decoded.name,
-							role: decoded.role,
-						});
+						// Parse stored user data instead of relying on JWT payload
+						const user = JSON.parse(userData);
+						setUser(user);
 					} else {
 						// Token expired or invalid
 						localStorage.removeItem("auth_token");
@@ -135,96 +131,36 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		setIsLoading(true);
 
 		try {
-			// Simulate API call - replace with actual API integration
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			// Use real API login
+			const result = await loginMutation({ email, password }).unwrap();
 
-			// Mock validation - replace with real authentication
-			// Define mock users with different roles
-			const mockUsers = [
-				{
-					email: "admin@electrolandgh.com",
-					password: "admin123",
-					userData: {
-						id: "1",
-						email: "admin@electrolandgh.com",
-						name: "Admin User",
-						role: "admin" as const,
-					},
-				},
-				{
-					email: "manager@electrolandgh.com",
-					password: "manager123",
-					userData: {
-						id: "2",
-						email: "manager@electrolandgh.com",
-						name: "Manager User",
-						role: "manager" as const,
-					},
-				},
-				{
-					email: "user@electrolandgh.com",
-					password: "user123",
-					userData: {
-						id: "3",
-						email: "user@electrolandgh.com",
-						name: "Regular User",
-						role: "user" as const,
-					},
-				},
-			];
+			// Store auth data
+			localStorage.setItem("auth_token", result.token);
+			localStorage.setItem("user_data", JSON.stringify(result.user));
+			setUser(result.user);
 
-			const foundUser = mockUsers.find((u) => u.email === email && u.password === password);
-
-			if (foundUser) {
-				const token = createMockJWT(foundUser.userData);
-
-				// Store auth data
-				localStorage.setItem("auth_token", token);
-				localStorage.setItem("user_data", JSON.stringify(foundUser.userData));
-				setUser(foundUser.userData);
-
-				toast.success("Login successful!");
-
-				return { success: true };
-			} else {
-				return { success: false, error: "Invalid email or password" };
-			}
-		} catch (error) {
-			return { success: false, error: "Login failed. Please try again." };
+			toast.success("Login successful!");
+			return { success: true };
+		} catch (error: any) {
+			console.error("Login error:", error);
+			const errorMessage = error?.data?.error || "Login failed. Please try again.";
+			return { success: false, error: errorMessage };
 		} finally {
 			setIsLoading(false);
 		}
 	};
 
 	const register = async (
-		email: string,
+		_email: string,
 		_password: string,
-		name: string
+		_name: string
 	): Promise<{ success: boolean; error?: string }> => {
 		setIsLoading(true);
 
 		try {
-			// Simulate API call - replace with actual API integration
-			await new Promise((resolve) => setTimeout(resolve, 1000));
-
-			// Mock registration - replace with real API
-			const userData: User = {
-				id: Date.now().toString(),
-				email: email,
-				name: name,
-				role: "user", // Default role for new users
-			};
-
-			const token = createMockJWT(userData);
-
-			// Store auth data
-			localStorage.setItem("auth_token", token);
-			localStorage.setItem("user_data", JSON.stringify(userData));
-			setUser(userData);
-
-			toast.success("Registration successful!");
-
-			return { success: true };
+			// TODO: Implement real registration with RTK Query
+			// For now, return not implemented
+			return { success: false, error: "Registration not implemented yet. Please contact admin." };
 		} catch (error) {
 			return { success: false, error: "Registration failed. Please try again." };
 		} finally {
@@ -292,11 +228,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 		return userPermissions.includes(permission);
 	};
 
-	const logout = () => {
-		localStorage.removeItem("auth_token");
-		localStorage.removeItem("user_data");
-		setUser(null);
-		toast.success("Logged out successfully!");
+	const logout = async () => {
+		try {
+			// Call API logout endpoint
+			await logoutMutation().unwrap();
+		} catch (error) {
+			console.warn("Logout API call failed, proceeding with local logout:", error);
+		} finally {
+			// Always clear local storage and state
+			localStorage.removeItem("auth_token");
+			localStorage.removeItem("user_data");
+			setUser(null);
+			toast.success("Logged out successfully!");
+		}
 	};
 
 	const value: AuthContextType = {

@@ -8,12 +8,13 @@ import {
 	ChevronDownIcon,
 	GridIcon,
 	HorizontaLDots,
-	ListIcon,
-	PageIcon,
 	PieChartIcon,
 	PlugInIcon,
-	TableIcon,
 	UserCircleIcon,
+	TaskIcon,
+	DownloadIcon,
+	EnvelopeIcon,
+	DocsIcon, // Using DocsIcon for settings
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useAuth } from "../context/AuthContext";
@@ -35,56 +36,225 @@ type NavItem = {
 
 const navItems: NavItem[] = [
 	{
+		name: "Dashboard",
 		icon: <GridIcon />,
-		name: "My Dashboard",
 		path: "/dashboard",
 	},
+	// JOB CARD MANAGEMENT (Different access levels)
 	{
-		icon: <TableIcon />,
-		name: "Installations",
+		icon: <TaskIcon />,
+		name: "Job Cards",
 		subItems: [
-			{ name: "Create Job", path: "/dashboard/create", pro: false },
-			{ name: "View Jobs", path: "/dashboard/installations", pro: false },
-			{ name: "Scan", path: "/dashboard/scan", pro: false },
+			// Admin - Full CRUD access
+			{ name: "All Job Cards", path: "/dashboard/job-cards", pro: false, requiredRoles: ["admin"] },
+			{
+				name: "Create Job Card",
+				path: "/dashboard/job-cards/create",
+				pro: false,
+				requiredRoles: ["admin", "manager"],
+			},
+			{
+				name: "Assign Job Card",
+				path: "/dashboard/job-cards/assign",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			// Manager - Create and view their jobs
+			{
+				name: "My Job Cards",
+				path: "/dashboard/job-cards/my-jobs",
+				pro: false,
+				requiredRoles: ["manager"],
+			},
+			// User - View by ID/Serial
+			{
+				name: "View Job Card",
+				path: "/dashboard/job-cards/view",
+				pro: false,
+				requiredRoles: ["user"],
+			},
 		],
 	},
+	// SCAN (Admin and Manager access - for searching job cards by ID)
+	{
+		icon: <PieChartIcon />,
+		name: "Scan",
+		requiredRoles: ["admin", "manager"],
+		subItems: [
+			{
+				name: "Scan QR Code",
+				path: "/dashboard/scan/qr-code",
+				pro: false,
+				requiredRoles: ["admin", "manager"],
+			},
+			{
+				name: "Manual ID Search",
+				path: "/dashboard/scan/manual",
+				pro: false,
+				requiredRoles: ["admin", "manager"],
+			},
+			{ name: "Batch Scan", path: "/dashboard/scan/batch", pro: false, requiredRoles: ["admin"] },
+		],
+	},
+	// REPORTS (Role-based access)
 	{
 		icon: <CalenderIcon />,
 		name: "Reports",
 		subItems: [
-			{ name: "My Reports", path: "/dashboard/my-reports", pro: false },
+			// All users can view their own reports
+			{ name: "My Reports", path: "/dashboard/reports/my-reports", pro: false },
+			// Admin can view all job reports
+			{
+				name: "All Job Reports",
+				path: "/dashboard/reports/job-reports",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			// Admin can view all system reports
 			{
 				name: "All Reports",
-				path: "/dashboard/all-reports",
+				path: "/dashboard/reports/all-reports",
 				pro: false,
-				requiredRoles: ["admin", "manager"],
+				requiredRoles: ["admin"],
+			},
+			// Manager can view team reports
+			{
+				name: "Team Reports",
+				path: "/dashboard/reports/team-reports",
+				pro: false,
+				requiredRoles: ["manager"],
 			},
 		],
 	},
+	// DOWNLOADS (Role-based access)
+	{
+		icon: <DownloadIcon />,
+		name: "Downloads",
+		subItems: [
+			// Admin can download all job cards
+			{
+				name: "Download Job Cards",
+				path: "/dashboard/downloads/job-cards",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			// Manager can download their created job cards
+			{
+				name: "My Job Downloads",
+				path: "/dashboard/downloads/my-jobs",
+				pro: false,
+				requiredRoles: ["manager"],
+			},
+			// User can download viewed job card
+			{
+				name: "Download Viewed Card",
+				path: "/dashboard/downloads/viewed-card",
+				pro: false,
+				requiredRoles: ["user"],
+			},
+		],
+	},
+	// MESSAGING (Admin can send to all, Manager limited)
+	{
+		icon: <EnvelopeIcon />,
+		name: "Messages",
+		requiredRoles: ["admin", "manager"],
+		subItems: [
+			// Admin can message everyone
+			{
+				name: "Send to Users",
+				path: "/dashboard/messages/to-users",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			{
+				name: "Send to Managers",
+				path: "/dashboard/messages/to-managers",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			{
+				name: "Broadcast Message",
+				path: "/dashboard/messages/broadcast",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			// Manager can only message their team
+			{
+				name: "Team Messages",
+				path: "/dashboard/messages/team",
+				pro: false,
+				requiredRoles: ["manager"],
+			},
+		],
+	},
+	// INSTALLATIONS (Existing functionality)
+	{
+		name: "Installations",
+		icon: <PlugInIcon />,
+		path: "/dashboard/installations",
+	},
+	// SETTINGS (Admin and Manager access)
 	{
 		name: "Settings",
-		icon: <UserCircleIcon />,
-		path: "/dashboard/settings",
+		icon: <DocsIcon />,
 		requiredRoles: ["admin", "manager"],
-	},
-	{
-		name: "Pages",
-		icon: <PageIcon />,
 		subItems: [
-			{ name: "Auth Demo", path: "/dashboard/auth-demo", pro: false },
-			{ name: "Blank Page", path: "/blank", pro: false },
-			{ name: "404 Error", path: "/error-404", pro: false },
+			{
+				name: "System Settings",
+				path: "/dashboard/settings/system",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			{
+				name: "Profile Settings",
+				path: "/dashboard/settings/profile",
+				pro: false,
+				requiredRoles: ["admin", "manager"],
+			},
+			{
+				name: "Permissions",
+				path: "/dashboard/settings/permissions",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+		],
+	},
+	// ADMIN ONLY - User Management
+	{
+		icon: <UserCircleIcon />,
+		name: "User Management",
+		requiredRoles: ["admin"],
+		subItems: [
+			{ name: "All Users", path: "/dashboard/users", pro: false, requiredRoles: ["admin"] },
+			{
+				name: "Create User",
+				path: "/dashboard/users/create",
+				pro: false,
+				requiredRoles: ["admin"],
+			},
+			{ name: "User Roles", path: "/dashboard/users/roles", pro: false, requiredRoles: ["admin"] },
 		],
 	},
 ];
-
 const othersItems: NavItem[] = [
 	{
 		icon: <PieChartIcon />,
 		name: "Support",
 		subItems: [
-			{ name: "Live Chat", path: "/chat", pro: false },
-			{ name: "Contact Us", path: "/contact", pro: false },
+			{ name: "Help Center", path: "/dashboard/help", pro: false },
+			{ name: "Live Chat", path: "/dashboard/chat", pro: false },
+			{ name: "Contact Support", path: "/dashboard/contact", pro: false },
+			{ name: "System Status", path: "/dashboard/status", pro: false, requiredRoles: ["admin"] },
+		],
+	},
+	{
+		icon: <BoxCubeIcon />,
+		name: "Development",
+		requiredRoles: ["admin"],
+		subItems: [
+			{ name: "Auth Demo", path: "/dashboard/auth-demo", pro: false, requiredRoles: ["admin"] },
+			{ name: "Test Pages", path: "/dashboard/test", pro: false, requiredRoles: ["admin"] },
 		],
 	},
 ];
