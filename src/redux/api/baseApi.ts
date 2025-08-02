@@ -25,7 +25,7 @@ export const externalApi = createApi({
 export const authApi = createApi({
 	reducerPath: "authApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: import.meta.env.VITE_AUTH_API_URL || "http://localhost:3030/api",
+		baseUrl: import.meta.env.VITE_AUTH_API_URL || "http://localhost:3030/",
 		prepareHeaders: (headers) => {
 			// Get JWT token from localStorage for auth
 			const token = localStorage.getItem("auth_token");
@@ -46,7 +46,7 @@ export const authApi = createApi({
 export const systemApi = createApi({
 	reducerPath: "systemApi",
 	baseQuery: fetchBaseQuery({
-		baseUrl: import.meta.env.VITE_SYSTEM_API_URL || "http://localhost:3001/api",
+		baseUrl: import.meta.env.VITE_SYSTEM_API_URL || "http://localhost:3001/",
 		prepareHeaders: (headers) => {
 			const token = localStorage.getItem("auth_token");
 

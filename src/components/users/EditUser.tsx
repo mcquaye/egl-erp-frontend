@@ -237,13 +237,13 @@ export default function EditUser() {
 							<div>
 								<span className='text-gray-500 dark:text-gray-400'>Created:</span>
 								<span className='ml-2 font-medium'>
-									{new Date(user.createdAt).toLocaleDateString()}
+									{new Date(user.created_at).toLocaleDateString()}
 								</span>
 							</div>
 							<div>
 								<span className='text-gray-500 dark:text-gray-400'>Last Updated:</span>
 								<span className='ml-2 font-medium'>
-									{new Date(user.updatedAt).toLocaleDateString()}
+									{new Date(user.updated_at).toLocaleDateString()}
 								</span>
 							</div>
 						</div>

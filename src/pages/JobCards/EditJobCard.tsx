@@ -64,15 +64,14 @@ export default function EditJobCardPage() {
 		if (!jobCard) return;
 
 		try {
-			// Destructure to exclude id from the spread
-			const { id, ...jobCardData } = jobCard;
+			// Follow the same pattern as CreateJobCard - send only the form data
+			const updatePayload = {
+				...formData,
+			};
 
 			await updateJobCard({
 				id: String(jobCard.id),
-				data: {
-					...jobCardData,
-					...formData,
-				},
+				data: updatePayload,
 			}).unwrap();
 
 			await alert({
