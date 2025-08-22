@@ -11,6 +11,8 @@ interface CreateUserFormData {
 	name: string;
 	email: string;
 	password: string;
+	companyName?: string;
+	companyPhoneNumber?: string;
 	confirmPassword: string;
 	role: "admin" | "manager" | "user";
 	phoneNumber: string;
@@ -27,6 +29,8 @@ export default function CreateUser() {
 		confirmPassword: "",
 		role: "user",
 		phoneNumber: "",
+		companyName: "",
+		companyPhoneNumber: "",
 	});
 
 	const [errors, setErrors] = useState<Partial<CreateUserFormData>>({});
@@ -66,6 +70,14 @@ export default function CreateUser() {
 
 		if (formData.phoneNumber && !/^\+?[\d\s-()]+$/.test(formData.phoneNumber)) {
 			newErrors.phoneNumber = "Please enter a valid phone number";
+		}
+
+		if (!formData.companyName?.trim()) {
+			newErrors.companyName = "Company Name is required";
+		}
+
+		if (formData.companyPhoneNumber && !/^\+?[\d\s-()]+$/.test(formData.companyPhoneNumber)) {
+			newErrors.companyPhoneNumber = "Please enter a valid company phone number";
 		}
 
 		setErrors(newErrors);
@@ -220,6 +232,40 @@ export default function CreateUser() {
 							/>
 							{errors.phoneNumber && (
 								<p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.phoneNumber}</p>
+							)}
+						</div>
+
+						{/* Company Name Field */}
+						<div>
+							<Label>Company Name</Label>
+							<Input
+								type='text'
+								placeholder='Enter company name (optional)'
+								value={formData.companyName}
+								onChange={(e) => handleInputChange("companyName", e.target.value)}
+								disabled={isLoading}
+								className={errors.companyName ? "border-red-500" : ""}
+							/>
+							{errors.companyName && (
+								<p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.companyName}</p>
+							)}
+						</div>
+
+						{/* Company Phone Number Field */}
+						<div>
+							<Label>Company Phone Number</Label>
+							<Input
+								type='tel'
+								placeholder='Enter company phone number (optional)'
+								value={formData.companyPhoneNumber}
+								onChange={(e) => handleInputChange("companyPhoneNumber", e.target.value)}
+								disabled={isLoading}
+								className={errors.companyPhoneNumber ? "border-red-500" : ""}
+							/>
+							{errors.companyPhoneNumber && (
+								<p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+									{errors.companyPhoneNumber}
+								</p>
 							)}
 						</div>
 					</div>

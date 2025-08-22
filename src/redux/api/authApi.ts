@@ -28,6 +28,8 @@ interface User {
 	email: string;
 	role: string;
 	phoneNumber?: string | null;
+	companyName?: string | null;
+	companyPhoneNumber?: string | null;
 	created_at: string; // Changed from createdAt to match API response
 	updated_at: string; // Changed from updatedAt to match API response
 }

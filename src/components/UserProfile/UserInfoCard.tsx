@@ -18,11 +18,16 @@ export default function UserInfoCard() {
 	// Use profile data from API if available, fallback to auth context
 	const currentUser = profileData || user;
 
+	// Hide Edit User Profile From Base Users
+	const isBaseUser = currentUser?.role === "user";
+
 	// Form state
 	const [formData, setFormData] = useState({
 		name: currentUser?.name || "",
 		email: currentUser?.email || "",
 		phoneNumber: currentUser?.phoneNumber || "",
+		companyName: currentUser?.companyName || "",
+		companyPhoneNumber: currentUser?.companyPhoneNumber || "",
 	});
 
 	const [formErrors, setFormErrors] = useState<Record<string, string>>({});
@@ -34,6 +39,8 @@ export default function UserInfoCard() {
 				name: currentUser.name || "",
 				email: currentUser.email || "",
 				phoneNumber: currentUser.phoneNumber || "",
+				companyName: currentUser.companyName || "",
+				companyPhoneNumber: currentUser.companyPhoneNumber || "",
 			});
 		}
 	}, [currentUser]);
@@ -156,6 +163,24 @@ export default function UserInfoCard() {
 						</div>
 
 						<div>
+							<p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+								Company Name
+							</p>
+							<p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+								{currentUser.companyName || "Not provided"}
+							</p>
+						</div>
+
+						<div>
+							<p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>
+								Company Phone Number
+							</p>
+							<p className='text-sm font-medium text-gray-800 dark:text-white/90'>
+								{currentUser.companyPhoneNumber || "Not provided"}
+							</p>
+						</div>
+
+						<div>
 							<p className='mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400'>Role</p>
 							<p className='text-sm font-medium text-gray-800 dark:text-white/90'>
 								{currentUser.role === "admin"
@@ -180,25 +205,35 @@ export default function UserInfoCard() {
 				</div>
 
 				<div className='flex flex-col gap-3 w-full lg:w-auto lg:flex-row'>
-					<button
-						onClick={openModal}
-						className='flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto'>
-						<svg
-							className='fill-current'
-							width='18'
-							height='18'
-							viewBox='0 0 18 18'
-							fill='none'
-							xmlns='http://www.w3.org/2000/svg'>
-							<path
-								fillRule='evenodd'
-								clipRule='evenodd'
-								d='M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z'
-								fill=''
-							/>
-						</svg>
-						Edit Profile
-					</button>
+					{/* Info message for base users */}
+					{isBaseUser && (
+						<p className='mb-3 text-sm text-gray-500 dark:text-gray-400'>
+							Contact your Manager / Admin to update your profile details.
+						</p>
+					)}
+
+					{/* Hide Edit Profile Button for Base Users */}
+					{!isBaseUser && (
+						<button
+							onClick={openModal}
+							className='flex w-full items-center justify-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200 lg:inline-flex lg:w-auto'>
+							<svg
+								className='fill-current'
+								width='18'
+								height='18'
+								viewBox='0 0 18 18'
+								fill='none'
+								xmlns='http://www.w3.org/2000/svg'>
+								<path
+									fillRule='evenodd'
+									clipRule='evenodd'
+									d='M15.0911 2.78206C14.2125 1.90338 12.7878 1.90338 11.9092 2.78206L4.57524 10.116C4.26682 10.4244 4.0547 10.8158 3.96468 11.2426L3.31231 14.3352C3.25997 14.5833 3.33653 14.841 3.51583 15.0203C3.69512 15.1996 3.95286 15.2761 4.20096 15.2238L7.29355 14.5714C7.72031 14.4814 8.11172 14.2693 8.42013 13.9609L15.7541 6.62695C16.6327 5.74827 16.6327 4.32365 15.7541 3.44497L15.0911 2.78206ZM12.9698 3.84272C13.2627 3.54982 13.7376 3.54982 14.0305 3.84272L14.6934 4.50563C14.9863 4.79852 14.9863 5.2734 14.6934 5.56629L14.044 6.21573L12.3204 4.49215L12.9698 3.84272ZM11.2597 5.55281L5.6359 11.1766C5.53309 11.2794 5.46238 11.4099 5.43238 11.5522L5.01758 13.5185L6.98394 13.1037C7.1262 13.0737 7.25666 13.003 7.35947 12.9002L12.9833 7.27639L11.2597 5.55281Z'
+									fill=''
+								/>
+							</svg>
+							Edit Profile
+						</button>
+					)}
 
 					<button
 						onClick={() => navigate("/dashboard/change-password")}
@@ -294,6 +329,42 @@ export default function UserInfoCard() {
 										{formErrors.phoneNumber && (
 											<p className='mt-1 text-sm text-red-600 dark:text-red-400'>
 												{formErrors.phoneNumber}
+											</p>
+										)}
+									</div>
+
+									<div className='col-span-2'>
+										<Label>Company Name</Label>
+										<Input
+											type='text'
+											value={formData.companyName}
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+												handleInputChange("companyName", e.target.value)
+											}
+											disabled={isUpdating}
+											placeholder='Enter your company name (optional)'
+										/>
+										{formErrors.companyName && (
+											<p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+												{formErrors.companyName}
+											</p>
+										)}
+									</div>
+
+									<div className='col-span-2'>
+										<Label>Company Phone Number</Label>
+										<Input
+											type='tel'
+											value={formData.companyPhoneNumber}
+											onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+												handleInputChange("companyPhoneNumber", e.target.value)
+											}
+											disabled={isUpdating}
+											placeholder='Enter your company phone number (optional)'
+										/>
+										{formErrors.companyPhoneNumber && (
+											<p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+												{formErrors.companyPhoneNumber}
 											</p>
 										)}
 									</div>

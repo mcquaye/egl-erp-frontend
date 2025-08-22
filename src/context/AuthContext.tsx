@@ -13,6 +13,8 @@ interface AuthUser {
 	verificationStatus?: VerificationStatus;
 	createdAt?: Date;
 	updatedAt?: Date;
+	companyName?: string | null;
+	companyPhoneNumber?: string | null;
 }
 
 interface JWTPayload {
@@ -20,6 +22,8 @@ interface JWTPayload {
 	email: string;
 	name: string;
 	phoneNumber?: string | null;
+	companyName?: string;
+	companyPhoneNumber?: string | null;
 	role: string;
 	exp: number;
 	iat: number;
@@ -34,6 +38,9 @@ interface AuthContextType {
 	register: (
 		email: string,
 		password: string,
+		phoneNumber: string,
+		companyName: string,
+		companyPhoneNumber: string,
 		name: string
 	) => Promise<{ success: boolean; error?: string }>;
 	resetPassword: (email: string) => Promise<{ success: boolean; error?: string }>;
@@ -153,7 +160,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 	const register = async (
 		_email: string,
 		_password: string,
-		_name: string
+		_name: string,
+		_phoneNumber: string,
+		_companyName: string,
+		_companyPhoneNumber: string
 	): Promise<{ success: boolean; error?: string }> => {
 		setIsLoading(true);
 

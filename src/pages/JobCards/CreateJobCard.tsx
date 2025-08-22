@@ -127,32 +127,9 @@ export default function CreateJobCardPage() {
 	useEffect(() => {
 		const initializeCanvas = () => {
 			if (signaturePadRef.current) {
-				const canvas = signaturePadRef.current.getCanvas();
-				const container = canvas.parentElement;
-
-				if (container) {
-					// Get container dimensions
-					const containerRect = container.getBoundingClientRect();
-					const containerWidth = containerRect.width - 16; // Account for padding
-
-					// Set canvas size to fit container while maintaining aspect ratio
-					const targetWidth = Math.min(containerWidth, 500);
-					const targetHeight = 200;
-
-					// Set the canvas internal dimensions (this affects drawing resolution)
-					canvas.width = targetWidth;
-					canvas.height = targetHeight;
-
-					// Set the canvas display size (CSS pixels)
-					canvas.style.width = targetWidth + "px";
-					canvas.style.height = targetHeight + "px";
-					canvas.style.maxWidth = "100%";
-					canvas.style.display = "block";
-					canvas.style.touchAction = "none";
-
-					// Force the signature pad to reinitialize event listeners
-					signaturePadRef.current.on();
-				}
+				// Just ensure the signature pad is properly initialized
+				// Don't modify canvas dimensions to avoid coordinate issues
+				signaturePadRef.current.on();
 			}
 		};
 
@@ -912,7 +889,7 @@ export default function CreateJobCardPage() {
 															<button
 																onClick={() => setStatusPage((prev) => Math.max(prev - 1, 1))}
 																disabled={statusPage === 1}
-																className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700'>
+																className='px-3 py-1 text-sm border rounded dark:text-gray-200 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700'>
 																Previous
 															</button>
 															<span className='px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded dark:bg-blue-900 dark:text-blue-300'>
@@ -923,7 +900,7 @@ export default function CreateJobCardPage() {
 																	setStatusPage((prev) => Math.min(prev + 1, totalPages))
 																}
 																disabled={statusPage === totalPages}
-																className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700'>
+																className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-700'>
 																Next
 															</button>
 														</div>
@@ -1120,7 +1097,7 @@ export default function CreateJobCardPage() {
 																<button
 																	onClick={() => setJobCardsPage((prev) => Math.max(prev - 1, 1))}
 																	disabled={jobCardsPage === 1}
-																	className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700'>
+																	className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-200'>
 																	Previous
 																</button>
 																<span className='px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded dark:bg-blue-900 dark:text-blue-300'>
@@ -1131,7 +1108,7 @@ export default function CreateJobCardPage() {
 																		setJobCardsPage((prev) => Math.min(prev + 1, totalPages))
 																	}
 																	disabled={jobCardsPage === totalPages}
-																	className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700'>
+																	className='px-3 py-1 text-sm border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700 dark:text-gray-200'>
 																	Next
 																</button>
 															</div>
@@ -1189,7 +1166,8 @@ export default function CreateJobCardPage() {
 										onChange={(e) =>
 											setJobCardData((prev) => ({ ...prev, jobDate: e.target.value }))
 										}
-										className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+										disabled
+										className='mt-1 block w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
 									/>
 								</div>
 
@@ -1198,12 +1176,13 @@ export default function CreateJobCardPage() {
 										Job Status *
 									</label>
 									<select
+										disabled
 										required
 										value={jobCardData.jobStatus || ""}
 										onChange={(e) =>
 											setJobCardData((prev) => ({ ...prev, jobStatus: e.target.value }))
 										}
-										className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white'>
+										className='mt-1 block w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'>
 										<option value=''>Select Status</option>
 										{loadingStatus ? (
 											<option>Loading...</option>
@@ -1246,13 +1225,14 @@ export default function CreateJobCardPage() {
 										App Number
 									</label>
 									<input
+										disabled
 										type='text'
 										value={jobCardData.appNumber || ""}
 										onChange={(e) =>
 											setJobCardData((prev) => ({ ...prev, appNumber: e.target.value }))
 										}
 										placeholder='Enter application number'
-										className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+										className='mt-1 block w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
 									/>
 								</div>
 
@@ -1261,12 +1241,13 @@ export default function CreateJobCardPage() {
 										App Date
 									</label>
 									<input
+										disabled
 										type='date'
 										value={jobCardData.appDate || ""}
 										onChange={(e) =>
 											setJobCardData((prev) => ({ ...prev, appDate: e.target.value }))
 										}
-										className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+										className='mt-1 block w-full rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-gray-500 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
 									/>
 								</div>
 							</div>
@@ -1409,13 +1390,12 @@ export default function CreateJobCardPage() {
 												ref={signaturePadRef}
 												penColor='#000000'
 												canvasProps={{
-													width: 500,
+													width: 1000,
 													height: 200,
 													className: "signature-canvas",
 													style: {
-														width: "100%",
 														height: "200px",
-														maxWidth: "500px",
+														maxWidth: "100%",
 														display: "block",
 														touchAction: "none",
 														userSelect: "none",

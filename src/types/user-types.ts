@@ -17,6 +17,8 @@ export interface User {
 	name: string;
 	email: string;
 	phoneNumber?: string | null;
+	companyName?: string | null;
+	companyPhoneNumber?: string | null;
 	password: string;
 	role: string;
 	verificationStatus: VerificationStatus;
@@ -43,6 +45,8 @@ export interface AuthUser {
 	name: string;
 	email: string;
 	phoneNumber?: string | null;
+	companyName?: string | null;
+	companyPhoneNumber?: string | null;
 	role: string;
 	verificationStatus: VerificationStatus;
 	// Location tracking fields
@@ -60,6 +64,8 @@ export interface CreateUserData {
 	name: string;
 	email: string;
 	phoneNumber?: string;
+	companyName?: string;
+	companyPhoneNumber?: string;
 	password: string;
 	role?: string;
 }
@@ -69,6 +75,8 @@ export interface UpdateUserData {
 	name?: string;
 	email?: string;
 	phoneNumber?: string;
+	companyName?: string;
+	companyPhoneNumber?: string;
 	role?: string;
 	verificationStatus?: VerificationStatus;
 	// Location updates
@@ -145,7 +153,7 @@ export const nameSchema = z
 
 export const phoneNumberSchema = z
 	.string()
-	.regex(/^[\+]?[1-9][\d]{0,15}$/, "Invalid phone number format")
+	.regex(/^[+]?([1-9][\d]{0,15})$/, "Invalid phone number format")
 	.optional()
 	.or(z.literal(""));
 
@@ -171,6 +179,8 @@ export const UserSchema = z.object({
 	id: z.number().int().positive(),
 	name: nameSchema,
 	email: emailSchema,
+	companyName: z.string().nullable().optional(),
+	companyPhoneNumber: z.string().nullable().optional(),
 	phoneNumber: z.string().nullable().optional(),
 	password: z.string(), // Don't validate password here since it's hashed
 	role: z.string(),
@@ -200,6 +210,8 @@ export const AuthUserSchema = z.object({
 	name: nameSchema,
 	email: emailSchema,
 	phoneNumber: z.string().nullable().optional(),
+	companyName: z.string().nullable().optional(),
+	companyPhoneNumber: z.string().nullable().optional(),
 	role: z.string(),
 	verificationStatus: VerificationStatusSchema,
 	// Location fields
@@ -217,6 +229,8 @@ export const CreateUserDataSchema = z.object({
 	name: nameSchema,
 	email: emailSchema,
 	phoneNumber: phoneNumberSchema,
+	companyName: z.string().nullable().optional(),
+	companyPhoneNumber: z.string().nullable().optional(),
 	password: passwordSchema,
 	role: z.string().optional().default("user"),
 });
@@ -226,6 +240,8 @@ export const UpdateUserDataSchema = z.object({
 	email: emailSchema.optional(),
 	phoneNumber: phoneNumberSchema,
 	role: z.string().optional(),
+	companyName: z.string().nullable().optional(),
+	companyPhoneNumber: z.string().nullable().optional(),
 	verificationStatus: VerificationStatusSchema.optional(),
 	// Location updates
 	lastKnownLatitude: latitudeSchema.optional(),
@@ -292,6 +308,8 @@ export const RegisterDataSchema = z
 		name: nameSchema,
 		email: emailSchema,
 		phoneNumber: phoneNumberSchema,
+		companyName: z.string().nullable().optional(),
+		companyPhoneNumber: z.string().nullable().optional(),
 		password: passwordSchema,
 		confirmPassword: z.string(),
 		role: z.string().optional().default("user"),

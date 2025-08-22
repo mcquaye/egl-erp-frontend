@@ -15,6 +15,8 @@ export interface LoginResponse {
 		email: string;
 		name: string;
 		phoneNumber?: string | null;
+		companyName?: string | null;
+		companyPhoneNumber?: string | null;
 		role: string;
 	};
 	error?: string;
@@ -27,6 +29,8 @@ export interface UsersListResponse {
 		name: string;
 		email: string;
 		phoneNumber?: string | null;
+		companyName?: string | null;
+		companyPhoneNumber?: string | null;
 		role: string;
 		createdAt: string;
 		updatedAt: string;

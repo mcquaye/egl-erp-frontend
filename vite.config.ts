@@ -14,6 +14,25 @@ export default defineConfig({
 				namedExport: "ReactComponent",
 			},
 		}),
+		{
+			name: "spa-fallback",
+			configureServer(server) {
+				server.middlewares.use((req, res, next) => {
+					// Skip API routes, static files, and Vite internals
+					if (
+						req.originalUrl?.startsWith("/api") ||
+						req.originalUrl?.includes(".") ||
+						req.originalUrl?.startsWith("/@")
+					) {
+						return next();
+					}
+
+					// Serve index.html for all client routes
+					req.originalUrl = "/";
+					next();
+				});
+			},
+		},
 	],
 	server: {
 		port: 5050,
