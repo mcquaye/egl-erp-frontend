@@ -4,7 +4,7 @@ import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
 import Badge from "../../components/ui/badge/Badge";
-import { EyeIcon } from "../../icons";
+import { ImEye } from "react-icons/im";
 import { Link } from "react-router";
 import { JobCard } from "../../types";
 
@@ -115,7 +115,7 @@ export default function MyJobCardsPage() {
 									<TableCell
 										isHeader
 										className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
-										Created
+										Created At
 									</TableCell>
 									<TableCell
 										isHeader
@@ -150,13 +150,13 @@ export default function MyJobCardsPage() {
 											{new Date(jobCard.jobDate).toLocaleDateString()}
 										</TableCell>
 										<TableCell className='px-6 py-4 whitespace-nowrap text-gray-900 dark:text-white'>
-											{new Date(jobCard.createdAt).toLocaleDateString()}
+											{jobCard.created_at ? new Date(jobCard.created_at).toLocaleString() : "N/A"}
 										</TableCell>
-										<TableCell className='px-6 py-4 whitespace-nowrap'>
+										<TableCell className='px-6 py-4 align-middle flex items-center justify-center whitespace-nowrap'>
 											<Link
 												to={`/dashboard/job-cards/view/${jobCard.id}`}
 												className='text-blue-600 hover:text-blue-800 dark:text-blue-400'>
-												<EyeIcon className='h-4 w-4' />
+												<ImEye className='h-5 w-5' />
 											</Link>
 										</TableCell>
 									</TableRow>

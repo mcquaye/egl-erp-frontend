@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+
 import { Link } from "react-router";
 import { useGetInstallationFormQuery } from "../../redux/api/installationApi";
 import { useCreateJobCardMutation, useGetAllJobCardsQuery } from "../../redux/api/jobCardApi";
@@ -16,16 +17,26 @@ import {
 	compressImageToBase64,
 	validateImageFile,
 	getBase64SizeInKB,
+	hasImageMetadata,
 } from "../../utils/imageUtils";
+import { isMetadataStrippingSupported, stripFileMetadata } from "../../utils/metaStripper";
+import { useAuth } from "../../context/AuthContext";
+import BarcodeScanner from "../../components/BarcodeScanner";
 
 export default function CreateJobCardPage() {
 	const [serialNumber, setSerialNumber] = useState("");
+	const [showScanner, setShowScanner] = useState(false);
 	const [searchSerial, setSearchSerial] = useState("");
 	const [selectedExistingJobCard, setSelectedExistingJobCard] = useState<any>(null);
 	const [showInstallationData, setShowInstallationData] = useState(false);
 	const [jobCardData, setJobCardData] = useState<Partial<JobCardCreateRequest>>({
 		jobDate: new Date().toISOString().split("T")[0],
 	});
+
+	const DEFAULT_CONSENT_MESSAGE = `I hereby confirm that I have purchased one or more Green AC(s) at a reduced purchase price financed through carbon revenues disbursed by the KliK Foundation of Switzerland. In return, I hereby waive my rights to the CO2 emission savings of this AC to the KliK Foundation. I hereby confirm that I did not receive or will apply for any other incentive by any other project funded by carbon or climate finance. I will not move the AC outside of Ghana. In case I sell the AC, I will inform the buyer about this waiver and that it will be passed on automatically to him or her. I agree that my personal data might be used for monitoring purposes and potential periodic monitoring or spot checks during the project period.`;
+
+	// Authenticated User
+	const { user } = useAuth();
 
 	// Pagination states
 	const [statusPage, setStatusPage] = useState(1);
@@ -65,7 +76,7 @@ export default function CreateJobCardPage() {
 	const installation = showInstallationData ? installationData?.data?.[0] : null;
 
 	// Check for existing job cards in our MySQL database first
-	const existingJobCardInMySQL = allJobCards?.find(
+	const existingJobCardInMySQL = allJobCards?.jobCards.find(
 		(jobCard: any) => jobCard.serialNumber === searchSerial
 	);
 
@@ -94,6 +105,9 @@ export default function CreateJobCardPage() {
 		outdoor: false,
 	});
 
+	// File loading states
+	const [fileLoading, setFileLoading] = useState({});
+
 	// Handle image compression and upload
 	const handleImageUpload = async (file: File, imageType: "serial" | "indoor" | "outdoor") => {
 		try {
@@ -103,8 +117,8 @@ export default function CreateJobCardPage() {
 			// Set loading state
 			setImageLoading((prev) => ({ ...prev, [imageType]: true }));
 
-			// Compress and convert to base64
-			const compressedBase64 = await compressImageToBase64(file);
+			// Compress with metadata stripping and convert to base64
+			const compressedBase64 = await compressImageToBase64(file, true); // stripMetadata = true
 			const sizeInKB = getBase64SizeInKB(compressedBase64);
 
 			// Update job card data with the compressed image
@@ -120,6 +134,59 @@ export default function CreateJobCardPage() {
 			toast.error(error instanceof Error ? error.message : "Failed to process image");
 		} finally {
 			setImageLoading((prev) => ({ ...prev, [imageType]: false }));
+		}
+	};
+
+	// General file upload handler with metadata stripping
+	const handleFileUpload = async (file: File, fieldName: string) => {
+		try {
+			// Set loading state
+			setFileLoading((prev) => ({ ...prev, [fieldName]: true }));
+
+			// Check if metadata stripping is supported for this file type
+			const isSupported = isMetadataStrippingSupported(file);
+			let processedFile = file;
+			let metadataStripped = false;
+
+			if (isSupported) {
+				try {
+					const result = await stripFileMetadata(file);
+					processedFile = result.file;
+					metadataStripped = result.metadataRemoved;
+				} catch (error) {
+					console.warn("Metadata stripping failed, using original file:", error);
+				}
+			}
+
+			// Convert to base64 for storage
+			const base64Data = await new Promise<string>((resolve, reject) => {
+				const reader = new FileReader();
+				reader.onload = () => {
+					if (typeof reader.result === "string") {
+						resolve(reader.result);
+					} else {
+						reject(new Error("Failed to convert to base64"));
+					}
+				};
+				reader.onerror = () => reject(new Error("Failed to read file"));
+				reader.readAsDataURL(processedFile);
+			});
+
+			const sizeInKB = Math.round(processedFile.size / 1024);
+
+			// Update data with the processed file
+			setJobCardData((prev) => ({
+				...prev,
+				[fieldName]: base64Data,
+			}));
+
+			const metadataMessage = metadataStripped ? " (metadata removed)" : "";
+			toast.success(`File uploaded successfully (${sizeInKB}KB)${metadataMessage}`);
+		} catch (error) {
+			console.error("File upload failed:", error);
+			toast.error(error instanceof Error ? error.message : "Failed to process file");
+		} finally {
+			setFileLoading((prev) => ({ ...prev, [fieldName]: false }));
 		}
 	};
 
@@ -285,6 +352,8 @@ export default function CreateJobCardPage() {
 				serialNumber: searchSerial,
 				jobDate: jobCardData.jobDate!,
 				jobStatus: jobCardData.jobStatus!,
+				jobType: jobCardData.jobType || "Commercial",
+				jobRegion: jobCardData.jobRegion || "Greater Accra",
 				remarks: jobCardData.remarks,
 				appNumber: jobCardData.appNumber,
 				appDate: jobCardData.appDate,
@@ -293,6 +362,10 @@ export default function CreateJobCardPage() {
 				indoorImage: jobCardData.indoorImage,
 				outdoorImage: jobCardData.outdoorImage,
 				signature: jobCardData.signature,
+				wifiConnection: jobCardData.wifiConnection || false,
+				consent: jobCardData.consent || false,
+				consentMessageOne: jobCardData.consentMessageOne || "N/A",
+
 				// Include installation data from Oracle
 				username: installation.username || "Unknown",
 				invoiceNo: installation.invoice_no,
@@ -311,7 +384,16 @@ export default function CreateJobCardPage() {
 				group: installation.group || "N/A",
 				branch: installation.branch || "N/A",
 				brand: installation.brand,
-				createdBy: 1, // TODO: Get from auth context
+				created_at: new Date(),
+				// Union Type
+				createdBy: user
+					? {
+							id: typeof user.id === "number" ? user.id : Number(user.id) || 1,
+							name: (user as any).name || user.email || "Admin",
+							email: user.email || "admin@egl-com",
+					  }
+					: { id: 1, name: "Admin", email: "admin@egl-com" },
+				assignedTo: user?.id || 1, // Assign to self by default
 			};
 
 			await createJobCard(payload).unwrap();
@@ -372,13 +454,22 @@ export default function CreateJobCardPage() {
 						Search Serial Number
 					</h3>
 					<form onSubmit={handleSearch} className='flex gap-4'>
-						<input
-							type='text'
-							value={serialNumber}
-							onChange={(e) => setSerialNumber(e.target.value)}
-							placeholder='Enter serial number (e.g., 1075E25W451301M04200)'
-							className='flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white'
-						/>
+						<div className='flex items-center gap-2 flex-1'>
+							<input
+								type='text'
+								value={serialNumber}
+								onChange={(e) => setSerialNumber(e.target.value)}
+								placeholder='Enter serial number (e.g., 1075E25W451301M04200)'
+								className='flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white'
+							/>
+							<button
+								type='button'
+								onClick={() => setShowScanner(true)}
+								title='Scan barcode using camera'
+								className='inline-flex items-center gap-2 rounded-lg border px-3 py-2 bg-white text-sm'>
+								Scan
+							</button>
+						</div>
 						<button
 							type='submit'
 							disabled={loadingInstallation}
@@ -386,6 +477,16 @@ export default function CreateJobCardPage() {
 							{loadingInstallation ? "Searching..." : "Search"}
 						</button>
 					</form>
+
+					{showScanner && (
+						<BarcodeScanner
+							onDetected={(value: string) => {
+								setSerialNumber(value);
+								setShowScanner(false);
+							}}
+							onClose={() => setShowScanner(false)}
+						/>
+					)}
 				</div>
 
 				{/* Duplicate Job Card Warning */}
@@ -1252,6 +1353,86 @@ export default function CreateJobCardPage() {
 								</div>
 							</div>
 
+							{/* Job Type */}
+							<div>
+								<label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+									Job Type
+								</label>
+								<select
+									required
+									value={jobCardData.jobType || ""}
+									onChange={(e) =>
+										setJobCardData((prev) => ({
+											...prev,
+											jobType: e.target.value as JobCardCreateRequest["jobType"],
+										}))
+									}
+									className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'>
+									<option value=''>Select Type</option>
+									<option value='Commercial'>Commercial</option>
+									<option value='Residential'>Residential</option>
+									<option value='Industrial'>Industrial</option>
+									<option value='Government'>Government</option>
+									<option value='Maintenance'>Maintenance</option>
+									{/* Add more types as needed */}
+								</select>
+							</div>
+
+							{/* Wifi Connection */}
+							<div>
+								<label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+									WiFi Connection
+								</label>
+								<select
+									required
+									value={jobCardData.wifiConnection ? "true" : "false"}
+									onChange={(e) =>
+										setJobCardData((prev) => ({
+											...prev,
+											wifiConnection: e.target.value === "true",
+										}))
+									}
+									className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'>
+									<option value='false'>No</option>
+									<option value='true'>Yes</option>
+								</select>
+							</div>
+
+							{/* Job Region */}
+							<div>
+								<label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+									Job Region
+								</label>
+								<select
+									required
+									value={jobCardData.jobRegion || ""}
+									onChange={(e) =>
+										setJobCardData((prev) => ({
+											...prev,
+											jobRegion: e.target.value as JobCardCreateRequest["jobRegion"],
+										}))
+									}
+									className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'>
+									<option value=''>Select a region</option>
+									<option value='Ahafo'>Ahafo</option>
+									<option value='Ashanti'>Ashanti</option>
+									<option value='Bono'>Bono</option>
+									<option value='Bono East'>Bono East</option>
+									<option value='Central'>Central</option>
+									<option value='Eastern'>Eastern</option>
+									<option value='Greater Accra'>Greater Accra</option>
+									<option value='Northern'>Northern</option>
+									<option value='North East'>North East</option>
+									<option value='Oti'>Oti</option>
+									<option value='Savannah'>Savannah</option>
+									<option value='Upper East'>Upper East</option>
+									<option value='Upper West'>Upper West</option>
+									<option value='Volta'>Volta</option>
+									<option value='Western'>Western</option>
+									<option value='Western North'>Western North</option>
+								</select>
+							</div>
+
 							{/* Installation Images Section */}
 							<div className='space-y-4'>
 								<h4 className='text-lg font-medium text-gray-800 dark:text-white'>
@@ -1363,6 +1544,46 @@ export default function CreateJobCardPage() {
 									</div>
 								</div>
 							</div>
+
+							{/* Consent Checkbox and Message for R290 installations */}
+							{jobCardData.jobStatus === "H024" && (
+								<div className='space-y-4'>
+									<div>
+										<label className='inline-flex items-center'>
+											<input
+												type='checkbox'
+												checked={!!jobCardData.consent}
+												onChange={(e) =>
+													setJobCardData((prev) => ({
+														...prev,
+														consent: e.target.checked,
+														consentMessageOne: e.target.checked
+															? prev.consentMessageOne || DEFAULT_CONSENT_MESSAGE
+															: "", // clear on uncheck
+													}))
+												}
+												className='form-checkbox h-5 w-5 text-blue-600'
+											/>
+											<span className='ml-2 text-sm text-gray-700 dark:text-gray-300'>
+												I confirm consent for R290 installation
+											</span>
+										</label>
+									</div>
+									{jobCardData.consent && (
+										<div>
+											<label className='block text-sm font-medium text-gray-700 dark:text-gray-300'>
+												Consent Message One
+											</label>
+											<textarea
+												readOnly
+												value={jobCardData.consentMessageOne || DEFAULT_CONSENT_MESSAGE}
+												className='mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 bg-gray-100 text-gray-700 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-gray-400'
+												rows={6}
+											/>
+										</div>
+									)}
+								</div>
+							)}
 
 							{/* Additional Notes merged with Remarks */}
 							<div>

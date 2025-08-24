@@ -1,6 +1,7 @@
 // Installation-related types and interfaces
 
 import { z } from "zod";
+import { User } from "./user-types";
 
 // ========== INSTALLATION DATA INTERFACES ==========
 
@@ -24,6 +25,7 @@ export interface InstallationItem {
 	branch: string;
 	brand: string;
 	comp_code: string;
+	// wifiConnection?: boolean;
 }
 
 export interface InstallationFormResponse {
@@ -71,14 +73,20 @@ export interface JobCard {
 	group: string;
 	branch: string;
 	brand: string;
+	wifiConnection?: boolean; // Indicates if WiFi connection is done.
 
 	// Job card specific data
 	jobStatus: string;
-	assignedTo?: string; // Person assigned to handle the job card
+	jobType: JobType;
+	jobRegion: JobRegion;
+	assignedTo?: number; // Person assigned to handle the job card
 	remarks?: string;
 	appNumber?: string;
 	appDate?: string; // YYYY-MM-DD format
 	gpsLocation?: string;
+	consent?: boolean; // Customer consent for R290 Type
+	consentMessageOne?: string;
+	consentMessageTwo?: string;
 
 	// Installation images
 	serialImage?: string; // URL to serial number image
@@ -87,15 +95,45 @@ export interface JobCard {
 	signature?: string; // Base64 encoded signature
 
 	// User who created the job card
-	createdBy: number;
+	createdBy?: {
+		id: number;
+		name: string;
+		email: string;
+	};
 	createdAt: string; // ISO date string
 	updatedAt: string; // ISO date string
+	created_at: Date; // For internal use when creating a job card
+	updated_at: Date; // For internal use when updating a job card
 }
+
+// Job Type
+export type JobType = "Commercial" | "Residential" | "Industrial" | "Government" | "Maintenance";
+
+// Job Region
+export type JobRegion =
+	| "Ahafo"
+	| "Ashanti"
+	| "Bono"
+	| "Bono East"
+	| "Central"
+	| "Eastern"
+	| "Greater Accra"
+	| "Northern"
+	| "North East"
+	| "Oti"
+	| "Savannah"
+	| "Upper East"
+	| "Upper West"
+	| "Volta"
+	| "Western"
+	| "Western North";
 
 export interface JobCardCreateRequest {
 	// Core job card data
 	serialNumber: string;
 	jobDate: string; // YYYY-MM-DD format
+	jobType: JobType;
+	jobRegion: JobRegion;
 	jobStatus: string;
 	remarks?: string;
 	appNumber?: string;
@@ -124,7 +162,18 @@ export interface JobCardCreateRequest {
 	group?: string;
 	branch?: string;
 	brand?: string;
-	createdBy?: number;
+	wifiConnection?: boolean;
+	consent?: boolean;
+	consentMessageOne?: string;
+	consentMessageTwo?: string;
+	createdBy?: {
+		id: number;
+		name: string;
+		email: string;
+	}; // User creating the job card
+	assignedTo?: number; // User assigned to the job card
+
+	created_at?: Date; // For internal use when creating a job card
 }
 
 export interface JobCardResponse {
@@ -204,7 +253,11 @@ export const InstallationItemSchema = z.object({
 	group: z.string().min(1, "Group is required"),
 	branch: z.string().min(1, "Branch is required"),
 	brand: z.string().min(1, "Brand is required"),
+	wifiConnection: z.boolean().optional(),
 	comp_code: z.string().min(1, "Company code is required"),
+	consent: z.boolean().optional(),
+	consentMessageOne: z.string().min(1, "Consent message one is required"),
+	consentMessageTwo: z.string().min(1, "Consent message two is required"),
 });
 
 // Installation form response validation
@@ -238,6 +291,8 @@ export const JobCardCreateRequestSchema = z.object({
 	serialNumber: z.string().min(1, "Serial number is required"),
 	jobDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)"),
 	jobStatus: z.string().min(1, "Job status is required"),
+	jobType: z.string().min(1, "Job type is required"),
+	jobRegion: z.string().min(1, "Job region is required"),
 	remarks: z.string().optional(),
 	appNumber: z.string().optional(),
 	appDate: z
@@ -249,12 +304,17 @@ export const JobCardCreateRequestSchema = z.object({
 	indoorImage: z.string().optional(),
 	outdoorImage: z.string().optional(),
 	signature: z.string().optional(),
+	consent: z.boolean().optional(),
+	consentMessageOne: z.string().min(1, "Consent message one is required"),
+	consentMessageTwo: z.string().min(1, "Consent message two is required"),
 });
 
 export const JobCardSchema = z.object({
 	id: z.number(),
 	jobNumber: z.string(),
 	jobDate: z.string(),
+	jobType: z.string().min(1, "Job type is required"),
+	jobRegion: z.string().min(1, "Job region is required"),
 	serialNumber: z.string(),
 	username: z.string(),
 	invoiceNo: z.string(),
@@ -273,6 +333,7 @@ export const JobCardSchema = z.object({
 	group: z.string(),
 	branch: z.string(),
 	brand: z.string(),
+	wifiConnection: z.boolean().optional(),
 	jobStatus: z.string(),
 	remarks: z.string().optional(),
 	appNumber: z.string().optional(),
@@ -282,9 +343,11 @@ export const JobCardSchema = z.object({
 	indoorImage: z.string().optional(),
 	outdoorImage: z.string().optional(),
 	signature: z.string().optional(),
-	createdBy: z.number(),
 	createdAt: z.string(),
 	updatedAt: z.string(),
+	consent: z.boolean().optional(),
+	consentMessageOne: z.string().min(1, "Consent message one is required"),
+	consentMessageTwo: z.string().min(1, "Consent message two is required"),
 });
 
 export const JobCardStatusOptionSchema = z.object({

@@ -51,20 +51,20 @@ const navItems: NavItem[] = [
 				name: "Create Job Card",
 				path: "/dashboard/job-cards/create",
 				pro: false,
-				requiredRoles: ["admin", "manager"],
+				requiredRoles: ["admin", "user"],
 			},
 			{
 				name: "Assign Job Card",
 				path: "/dashboard/job-cards/assign",
 				pro: false,
-				requiredRoles: ["admin"],
+				requiredRoles: ["admin", "manager"],
 			},
 			// Manager - Create and view their jobs
 			{
 				name: "My Job Cards",
 				path: "/dashboard/job-cards/my-jobs",
 				pro: false,
-				requiredRoles: ["manager"],
+				requiredRoles: ["manager", "user"],
 			},
 			// User - View by ID/Serial
 			{
@@ -108,7 +108,7 @@ const navItems: NavItem[] = [
 				name: "All Job Reports",
 				path: "/dashboard/reports/job-reports",
 				pro: false,
-				requiredRoles: ["admin"],
+				requiredRoles: ["admin", "manager"],
 			},
 			// Admin can view all system reports
 			{
@@ -136,7 +136,7 @@ const navItems: NavItem[] = [
 				name: "Download Job Cards",
 				path: "/dashboard/downloads/job-cards",
 				pro: false,
-				requiredRoles: ["admin"],
+				requiredRoles: ["admin", "manager"],
 			},
 			// Manager can download their created job cards
 			{
@@ -150,7 +150,7 @@ const navItems: NavItem[] = [
 				name: "Download Viewed Card",
 				path: "/dashboard/downloads/viewed-card",
 				pro: false,
-				requiredRoles: ["user"],
+				requiredRoles: [""],
 			},
 		],
 	},

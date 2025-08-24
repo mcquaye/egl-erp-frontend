@@ -21,9 +21,12 @@ export const jobCardApiEndpoints = authApi.injectEndpoints({
 		}),
 
 		// Get all job cards
-		getAllJobCards: builder.query<JobCard[], void>({
+		getAllJobCards: builder.query<{ jobCards: JobCard[]; pagination: any }, void>({
 			query: () => "/job-cards",
-			providesTags: ["JobCard"],
+			transformResponse: (response: { jobCards: JobCard[]; pagination: any }) => ({
+				jobCards: response.jobCards,
+				pagination: response.pagination,
+			}),
 		}),
 
 		// Get my job cards (for managers)

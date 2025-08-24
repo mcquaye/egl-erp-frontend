@@ -95,6 +95,28 @@ export default function ViewJobCardPage() {
 						</form>
 					</div>
 				</div>
+
+				{/* Consent */}
+				{(jobCard?.consent || jobCard?.consentMessageOne) && (
+					<div className='mt-6'>
+						<h4 className='font-semibold text-gray-800 dark:text-white mb-2'>Consent</h4>
+						<div className='rounded-lg bg-gray-50 p-4 dark:bg-gray-800'>
+							<p className='text-gray-900 dark:text-white'>
+								Consent given: <strong>{jobCard?.consent ? "Yes" : "No"}</strong>
+							</p>
+							{jobCard?.consentMessageOne && (
+								<div className='mt-3'>
+									<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+										Consent Message
+									</label>
+									<p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
+										{jobCard.consentMessageOne}
+									</p>
+								</div>
+							)}
+						</div>
+					</div>
+				)}
 			</div>
 		);
 	}
@@ -244,6 +266,15 @@ export default function ViewJobCardPage() {
 									</label>
 									<p className='text-gray-900 dark:text-white'>{jobCard.qty}</p>
 								</div>
+
+								<div>
+									<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+										WiFi Connected?
+									</label>
+									<p className='text-gray-900 dark:text-white'>
+										{jobCard.wifiConnection ? "Yes" : "No"}
+									</p>
+								</div>
 							</div>
 						</div>
 
@@ -300,6 +331,25 @@ export default function ViewJobCardPage() {
 								</div>
 							</div>
 						</div>
+
+						{/* Installation Information */}
+						<div className='space-y-4'>
+							<h4 className='font-semibold text-gray-800 dark:text-white'>
+								Installation Information
+							</h4>
+							<div>
+								<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+									Installation Type
+								</label>
+								<p className='text-gray-900 dark:text-white'>{jobCard.jobType}</p>
+							</div>
+							<div>
+								<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+									Job Region
+								</label>
+								<p className='text-gray-900 dark:text-white'>{jobCard.jobRegion || "N/A"}</p>
+							</div>
+						</div>
 					</div>
 
 					{/* Remarks */}
@@ -308,6 +358,28 @@ export default function ViewJobCardPage() {
 							<h4 className='font-semibold text-gray-800 dark:text-white mb-2'>Remarks</h4>
 							<div className='rounded-lg bg-gray-50 p-4 dark:bg-gray-800'>
 								<p className='text-gray-900 dark:text-white'>{jobCard.remarks}</p>
+							</div>
+						</div>
+					)}
+
+					{/* Consent */}
+					{(jobCard.consent || jobCard.consentMessageOne) && (
+						<div className='mt-6'>
+							<h4 className='font-semibold text-gray-800 dark:text-white mb-2'>Consent</h4>
+							<div className='rounded-lg bg-gray-50 p-4 dark:bg-gray-800'>
+								<p className='text-gray-900 dark:text-white'>
+									Consent given: <strong>{jobCard.consent ? "Yes" : "No"}</strong>
+								</p>
+								{jobCard.consentMessageOne && (
+									<div className='mt-3'>
+										<label className='text-sm font-medium text-gray-700 dark:text-gray-300'>
+											Consent Message
+										</label>
+										<p className='text-gray-900 dark:text-white whitespace-pre-wrap'>
+											{jobCard.consentMessageOne}
+										</p>
+									</div>
+								)}
 							</div>
 						</div>
 					)}

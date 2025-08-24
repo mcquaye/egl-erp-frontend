@@ -31,10 +31,17 @@ const GPSMapComponent: React.FC<GPSMapComponentProps> = ({
 				zoom={zoom}
 				style={{ height: "100%", width: "100%" }}
 				key={`${lat}-${lng}`} // Force re-render when coordinates change
-			>
+				scrollWheelZoom={false}
+				doubleClickZoom={false}
+				dragging={false}
+				zoomControl={false}
+				touchZoom={false}>
+				{/* <TileLayer
+					attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+				/> */}
 				<TileLayer
-					attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-					url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+					attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
+					url='https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 				/>
 				<Marker position={[lat, lng]}>
 					<Popup>

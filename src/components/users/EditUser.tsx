@@ -12,6 +12,8 @@ interface EditUserFormData {
 	email: string;
 	role: "admin" | "manager" | "user";
 	phoneNumber: string;
+	companyName: string;
+	companyPhoneNumber: string;
 }
 
 export default function EditUser() {
@@ -27,6 +29,8 @@ export default function EditUser() {
 		email: "",
 		role: "user",
 		phoneNumber: "",
+		companyName: "",
+		companyPhoneNumber: "",
 	});
 
 	const [errors, setErrors] = useState<Partial<EditUserFormData>>({});
@@ -39,6 +43,8 @@ export default function EditUser() {
 				email: user.email,
 				role: user.role as "admin" | "manager" | "user",
 				phoneNumber: user.phoneNumber || "",
+				companyName: user.companyName || "",
+				companyPhoneNumber: user.companyPhoneNumber || "",
 			});
 		}
 	}, [user]);
@@ -68,6 +74,14 @@ export default function EditUser() {
 			newErrors.phoneNumber = "Please enter a valid phone number";
 		}
 
+		if (formData.companyName && !formData.companyName.trim()) {
+			newErrors.companyName = "Company name cannot be empty";
+		}
+
+		if (formData.companyPhoneNumber && !/^\+?[\d\s-()]+$/.test(formData.companyPhoneNumber)) {
+			newErrors.companyPhoneNumber = "Please enter a valid company phone number";
+		}
+
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
@@ -87,6 +101,8 @@ export default function EditUser() {
 					email: formData.email.trim().toLowerCase(),
 					role: formData.role,
 					phoneNumber: formData.phoneNumber.trim() || null,
+					companyName: formData.companyName.trim() || null,
+					companyPhoneNumber: formData.companyPhoneNumber.trim() || null,
 				},
 			}).unwrap();
 
@@ -222,6 +238,40 @@ export default function EditUser() {
 							/>
 							{errors.phoneNumber && (
 								<p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.phoneNumber}</p>
+							)}
+						</div>
+
+						{/* Company Name Field */}
+						<div>
+							<Label>Company Name</Label>
+							<Input
+								type='text'
+								placeholder='Enter company name (optional)'
+								value={formData.companyName}
+								onChange={(e) => handleInputChange("companyName", e.target.value)}
+								disabled={isUpdating}
+								className={errors.companyName ? "border-red-500" : ""}
+							/>
+							{errors.companyName && (
+								<p className='mt-1 text-sm text-red-600 dark:text-red-400'>{errors.companyName}</p>
+							)}
+						</div>
+
+						{/* Company Phone Number Field */}
+						<div>
+							<Label>Company Phone Number</Label>
+							<Input
+								type='tel'
+								placeholder='Enter company phone number (optional)'
+								value={formData.companyPhoneNumber}
+								onChange={(e) => handleInputChange("companyPhoneNumber", e.target.value)}
+								disabled={isUpdating}
+								className={errors.companyPhoneNumber ? "border-red-500" : ""}
+							/>
+							{errors.companyPhoneNumber && (
+								<p className='mt-1 text-sm text-red-600 dark:text-red-400'>
+									{errors.companyPhoneNumber}
+								</p>
 							)}
 						</div>
 					</div>

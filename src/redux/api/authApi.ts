@@ -8,6 +8,8 @@ interface UserCreateRequest {
 	password: string;
 	role: "admin" | "manager" | "user";
 	phoneNumber?: string | null;
+	companyName?: string | null;
+	companyPhoneNumber?: string | null;
 }
 
 interface UserUpdateRequest {
@@ -15,6 +17,8 @@ interface UserUpdateRequest {
 	email?: string;
 	role?: "admin" | "manager" | "user";
 	phoneNumber?: string | null;
+	companyName?: string | null;
+	companyPhoneNumber?: string | null;
 }
 
 interface UserChangePasswordRequest {

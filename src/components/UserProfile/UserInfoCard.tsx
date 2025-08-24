@@ -204,7 +204,7 @@ export default function UserInfoCard() {
 					</div>
 				</div>
 
-				<div className='flex flex-col gap-3 w-full lg:w-auto lg:flex-row'>
+				<div className='flex flex-col gap-3 w-full lg:w-auto lg:flex-row items-center'>
 					{/* Info message for base users */}
 					{isBaseUser && (
 						<p className='mb-3 text-sm text-gray-500 dark:text-gray-400'>
