@@ -210,7 +210,8 @@ export const selectFilteredJobCards = (state: { jobCard: JobCardState }) => {
 	}
 
 	if (filters.assignedTo) {
-		filtered = filtered.filter((jc) => jc.assignedTo === filters.assignedTo);
+		// filters.assignedTo is a string (from UI); job card assignedTo is numeric — compare as strings
+		filtered = filtered.filter((jc) => String(jc.assignedTo ?? "") === filters.assignedTo);
 	}
 
 	if (filters.searchTerm) {

@@ -135,6 +135,12 @@ export default function InstallationSearch({
 									</div>
 									<div>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>
+											Customer Code:
+										</span>
+										<p className='text-gray-900 dark:text-white font-mono'>{item.custcode}</p>
+									</div>
+									<div>
+										<span className='font-medium text-gray-700 dark:text-gray-300'>
 											Contact Person:
 										</span>
 										<p className='text-gray-900 dark:text-white'>{item.contact_person}</p>
@@ -155,7 +161,7 @@ export default function InstallationSearch({
 										<span className='font-medium text-gray-700 dark:text-gray-300'>
 											Invoice No:
 										</span>
-										<p className='text-gray-900 dark:text-white'>{item.invoice_no}</p>
+										<p className='text-gray-900 dark:text-white font-mono'>{item.invoice_no}</p>
 									</div>
 									<div>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>
@@ -171,7 +177,7 @@ export default function InstallationSearch({
 										<span className='font-medium text-gray-700 dark:text-gray-300'>
 											Delivery No:
 										</span>
-										<p className='text-gray-900 dark:text-white'>{item.delivery_no}</p>
+										<p className='text-gray-900 dark:text-white font-mono'>{item.delivery_no}</p>
 									</div>
 									<div>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>
@@ -181,11 +187,17 @@ export default function InstallationSearch({
 											{new Date(item.delivery_date).toLocaleDateString()}
 										</p>
 									</div>
+									<div>
+										<span className='font-medium text-gray-700 dark:text-gray-300'>Quantity:</span>
+										<p className='text-gray-900 dark:text-white'>{item.qty}</p>
+									</div>
 
 									{/* Product Information */}
 									<div>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>Item Code:</span>
-										<p className='text-gray-900 dark:text-white font-mono'>{item.item_code}</p>
+										<p className='text-gray-900 dark:text-white font-mono bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded'>
+											{item.item_code}
+										</p>
 									</div>
 									<div className='md:col-span-2'>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>
@@ -195,7 +207,7 @@ export default function InstallationSearch({
 									</div>
 									<div>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>Serial No:</span>
-										<p className='text-gray-900 dark:text-white font-mono bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded'>
+										<p className='text-gray-900 dark:text-white font-mono bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded'>
 											{item.serial_no}
 										</p>
 									</div>
@@ -208,6 +220,24 @@ export default function InstallationSearch({
 										<p className='text-gray-900 dark:text-white'>{item.group}</p>
 									</div>
 
+									{/* Classification & Categories */}
+									<div>
+										<span className='font-medium text-gray-700 dark:text-gray-300'>
+											Classification:
+										</span>
+										<p className='text-gray-900 dark:text-white'>{item.classification}</p>
+									</div>
+									<div>
+										<span className='font-medium text-gray-700 dark:text-gray-300'>Sub Group:</span>
+										<p className='text-gray-900 dark:text-white'>{item.sub_group}</p>
+									</div>
+									<div>
+										<span className='font-medium text-gray-700 dark:text-gray-300'>
+											Sub Sub Group:
+										</span>
+										<p className='text-gray-900 dark:text-white'>{item.sub_sub_group}</p>
+									</div>
+
 									{/* System Information */}
 									<div>
 										<span className='font-medium text-gray-700 dark:text-gray-300'>Branch:</span>
@@ -217,6 +247,32 @@ export default function InstallationSearch({
 										<span className='font-medium text-gray-700 dark:text-gray-300'>Username:</span>
 										<p className='text-gray-900 dark:text-white'>{item.username}</p>
 									</div>
+									<div>
+										<span className='font-medium text-gray-700 dark:text-gray-300'>
+											Company Code:
+										</span>
+										<p className='text-gray-900 dark:text-white font-mono'>{item.comp_code}</p>
+									</div>
+
+									{/* Optional Fields */}
+									{item.sup_item_code && (
+										<div>
+											<span className='font-medium text-gray-700 dark:text-gray-300'>
+												Supplier Item Code:
+											</span>
+											<p className='text-gray-900 dark:text-white font-mono'>
+												{item.sup_item_code}
+											</p>
+										</div>
+									)}
+									{item.item_size && (
+										<div>
+											<span className='font-medium text-gray-700 dark:text-gray-300'>
+												Item Size:
+											</span>
+											<p className='text-gray-900 dark:text-white'>{item.item_size}</p>
+										</div>
+									)}
 								</div>
 							</div>
 						))}

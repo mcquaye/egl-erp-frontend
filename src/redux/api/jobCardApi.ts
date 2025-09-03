@@ -1,5 +1,6 @@
 import { authApi } from "./baseApi";
 import type { JobCardCreateRequest, JobCard } from "../../types";
+import type { StatisticsData } from "../../types/statistics-types";
 
 // Define update request type
 export interface JobCardUpdateRequest extends Partial<JobCardCreateRequest> {
@@ -27,6 +28,14 @@ export const jobCardApiEndpoints = authApi.injectEndpoints({
 				jobCards: response.jobCards,
 				pagination: response.pagination,
 			}),
+		}),
+
+		// Get job cards statistics for dashboard
+		getStatistics: builder.query<StatisticsData, void>({
+			query: () => "/job-cards/statistics",
+			// Server returns a wrapper { success, data, message, timestamp }
+			// transformResponse to return only the inner data (the stats object)
+			transformResponse: (response: any) => response?.data ?? response,
 		}),
 
 		// Get my job cards (for managers)
@@ -77,6 +86,7 @@ export const {
 	useGetAllJobCardsQuery,
 	useGetMyJobCardsQuery,
 	useGetJobCardByIdQuery,
+	useGetStatisticsQuery,
 	useUpdateJobCardMutation,
 	useDeleteJobCardMutation,
 	useAssignJobCardMutation,

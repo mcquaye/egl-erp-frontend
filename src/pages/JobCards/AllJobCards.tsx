@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
 	useGetAllJobCardsQuery,
 	useGetMyJobCardsQuery,
 	useDeleteJobCardMutation,
 } from "../../redux/api/jobCardApi";
-import { JobCard, User } from "../../types";
+import { JobCard } from "../../types";
 import PageMeta from "../../components/common/PageMeta";
 import PageBreadcrumb from "../../components/common/PageBreadCrumb";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../../components/ui/table";
@@ -32,21 +32,39 @@ export default function AllJobCardsPage() {
 		data: allJobCardsData,
 		isLoading: allLoading,
 		error: allError,
+		refetch,
 	} = useGetAllJobCardsQuery(undefined, { skip: !isAdmin });
 
 	const {
 		data: myJobCardsData,
 		isLoading: myJobCardsLoading,
 		error: myJobCardsError,
+		refetch: refetchMy,
 	} = useGetMyJobCardsQuery(user?.id?.toString() ?? "", { skip: isAdmin || !user?.id });
 	const [deleteJobCard] = useDeleteJobCardMutation();
-
-	// Verify Data To Show
-	const jobCardsToShow = isAdmin ? allJobCardsData : myJobCardsData;
 
 	// Compute loading/error from the active query (avoid colliding with confirm hook's `loading`)
 	const isQueryLoading = isAdmin ? allLoading : myJobCardsLoading;
 	const queryError = isAdmin ? allError : myJobCardsError;
+
+	// Always attempt a fresh fetch when we land on this page.
+	useEffect(() => {
+		if (isAdmin) {
+			refetch?.();
+		} else if (user?.id) {
+			refetchMy?.();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isAdmin, user?.id]);
+
+	// Manual refresh handler for header button
+	const handleRefresh = () => {
+		if (isAdmin) {
+			refetch?.();
+		} else {
+			refetchMy?.();
+		}
+	};
 
 	// Modal state
 	const [isModalOpen, setIsModalOpen] = useState(false);
@@ -70,6 +88,7 @@ export default function AllJobCardsPage() {
 				setLoading(true);
 				await deleteJobCard(jobCard.id.toString()).unwrap();
 				toast.success("Job card deleted successfully");
+				refetch();
 			} catch (error: any) {
 				console.error("Delete job card error:", error);
 				toast.error(error?.message || "Failed to delete job card");
@@ -99,6 +118,25 @@ export default function AllJobCardsPage() {
 		if (status.includes("PENDING") || status.includes("IN_PROGRESS")) return "warning";
 		if (status.includes("CANCELLED") || status.includes("FAILED")) return "error";
 		return "warning"; // default to warning instead of "default"
+	};
+
+	// Map jobType to badge color classes
+	const getJobTypeBadgeClasses = (type?: string) => {
+		if (!type) return "bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300";
+		switch (type.toLowerCase()) {
+			case "commercial":
+				return "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300";
+			case "residential":
+				return "bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+			case "industrial":
+				return "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300";
+			case "government":
+				return "bg-purple-50 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
+			case "maintenance":
+				return "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300";
+			default:
+				return "bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300";
+		}
 	};
 
 	if (isQueryLoading) {
@@ -143,11 +181,20 @@ export default function AllJobCardsPage() {
 							Total: {allJobCardsData?.pagination.total || 0} job cards
 						</p>
 					</div>
-					<Link
-						to='/dashboard/job-cards/create'
-						className='rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'>
-						Create New Job Card
-					</Link>
+					<div className='flex items-center gap-2'>
+						<button
+							onClick={handleRefresh}
+							className='rounded-lg bg-gray-100 px-3 py-2 text-gray-700 hover:bg-gray-200'
+							disabled={isQueryLoading}
+							title='Refresh job cards'>
+							{isQueryLoading ? "Refreshing..." : "Refresh"}
+						</button>
+						<Link
+							to='/dashboard/job-cards/create'
+							className='rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700'>
+							Create New Job Card
+						</Link>
+					</div>
 				</div>
 
 				{/* Table */}
@@ -170,6 +217,7 @@ export default function AllJobCardsPage() {
 									className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
 									Serial Number
 								</TableCell>
+
 								<TableCell
 									isHeader
 									className='px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400'>
@@ -196,8 +244,25 @@ export default function AllJobCardsPage() {
 							{allJobCardsData?.jobCards.map((jobCard: JobCard) => (
 								<TableRow key={jobCard.id}>
 									<TableCell className='px-6 py-4 whitespace-nowrap'>
-										<div className='font-medium text-gray-900 dark:text-white'>
-											{jobCard.jobNumber}
+										<div className='flex flex-col space-y-1'>
+											<div className='font-medium text-gray-900 dark:text-white'>
+												{jobCard.jobNumber}
+											</div>
+											{jobCard.jobRegion && (
+												<div className='mt-1'>
+													<span className='inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300'>
+														{jobCard.jobRegion}
+													</span>
+												</div>
+											)}
+											{jobCard.jobType && (
+												<span
+													className={`self-start max-w-max inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getJobTypeBadgeClasses(
+														jobCard.jobType
+													)}`}>
+													{jobCard.jobType}
+												</span>
+											)}
 										</div>
 									</TableCell>
 									<TableCell className='px-6 py-4'>
@@ -550,6 +615,29 @@ export default function AllJobCardsPage() {
 										</div>
 									)}
 								</div>
+							</div>
+						)}
+
+						{/* Consent for Sub Sub Group Models */}
+						{Boolean(selectedJobCard.consent) && (
+							<div className='bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-6'>
+								<h3 className='text-lg font-semibold text-gray-800 dark:text-white mb-4'>
+									Customer Consent
+								</h3>
+								{Boolean(selectedJobCard.consent) && (
+									<p className='flex items-center gap-3 text-gray-900 dark:text-white leading-relaxed'>
+										<span className='inline-flex items-center justify-center w-6 h-6 bg-green-100 text-green-800 rounded-full font-semibold'>
+											✓
+										</span>
+										<span className='font-medium'>Consent given</span>
+									</p>
+								)}
+								<p className='text-gray-900 dark:text-white leading-relaxed'>
+									{selectedJobCard.consentMessageOne}
+								</p>
+								<p className='text-gray-900 dark:text-white leading-relaxed'>
+									{selectedJobCard.consentMessageTwo}
+								</p>
 							</div>
 						)}
 

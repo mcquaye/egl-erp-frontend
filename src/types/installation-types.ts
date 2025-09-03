@@ -1,9 +1,10 @@
 // Installation-related types and interfaces
 
 import { z } from "zod";
-import { User } from "./user-types";
 
 // ========== INSTALLATION DATA INTERFACES ==========
+
+export type JobCardInstallationStatus = "Complete" | "In-Progress" | "Pending";
 
 export interface InstallationItem {
 	username: string;
@@ -19,13 +20,17 @@ export interface InstallationItem {
 	serial_no: string;
 	delivery_no: string;
 	delivery_date: string; // YYYY-MM-DD format
-	qty: number;
+	qty: number | string;
 	classification: string;
 	group: string;
 	branch: string;
 	brand: string;
 	comp_code: string;
-	// wifiConnection?: boolean;
+	sup_item_code?: string | null;
+	sub_group?: string;
+	sub_sub_group?: string;
+	item_size?: string | null;
+	wifiConnection?: boolean;
 }
 
 export interface InstallationFormResponse {
@@ -76,7 +81,7 @@ export interface JobCard {
 	wifiConnection?: boolean; // Indicates if WiFi connection is done.
 
 	// Job card specific data
-	jobStatus: string;
+	jobStatus: JobCardInstallationStatus;
 	jobType: JobType;
 	jobRegion: JobRegion;
 	assignedTo?: number; // Person assigned to handle the job card
@@ -166,12 +171,9 @@ export interface JobCardCreateRequest {
 	consent?: boolean;
 	consentMessageOne?: string;
 	consentMessageTwo?: string;
-	createdBy?: {
-		id: number;
-		name: string;
-		email: string;
-	}; // User creating the job card
+	createdBy?: number; // User ID of the creator
 	assignedTo?: number; // User assigned to the job card
+	sub_sub_group?: string; // Used to check for condition
 
 	created_at?: Date; // For internal use when creating a job card
 }

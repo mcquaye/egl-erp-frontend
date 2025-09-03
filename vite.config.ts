@@ -2,14 +2,12 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import svgr from "vite-plugin-svgr";
 
-// https://vite.dev/config/
 export default defineConfig({
 	plugins: [
 		react(),
 		svgr({
 			svgrOptions: {
 				icon: true,
-				// This will transform your SVG to a React component
 				exportType: "named",
 				namedExport: "ReactComponent",
 			},
@@ -17,8 +15,7 @@ export default defineConfig({
 		{
 			name: "spa-fallback",
 			configureServer(server) {
-				server.middlewares.use((req, res, next) => {
-					// Skip API routes, static files, and Vite internals
+				server.middlewares.use((req, _res, next) => {
 					if (
 						req.originalUrl?.startsWith("/api") ||
 						req.originalUrl?.includes(".") ||
@@ -26,8 +23,6 @@ export default defineConfig({
 					) {
 						return next();
 					}
-
-					// Serve index.html for all client routes
 					req.originalUrl = "/";
 					next();
 				});
@@ -41,8 +36,8 @@ export default defineConfig({
 			overlay: true,
 		},
 		watch: {
-			usePolling: true, // Helps with file watching
-			interval: 1000, // Poll every second
+			usePolling: true,
+			interval: 1000,
 		},
 		proxy: {
 			"/api": {
@@ -61,5 +56,17 @@ export default defineConfig({
 		outDir: "dist",
 		emptyOutDir: true,
 		sourcemap: true,
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					// Split large libraries into separate chunks
+					react: ["react", "react-dom", "react-router-dom"],
+					// Add other large libraries here, e.g.:
+					// lodash: ["lodash"],
+					// firebase: ["firebase/app", "firebase/auth", "firebase/firestore"],
+				},
+			},
+		},
+		chunkSizeWarningLimit: 3000, // Increase the warning limit to 1000 KB
 	},
 });

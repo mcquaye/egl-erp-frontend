@@ -1,3 +1,18 @@
+# Client-specific ignores
+node_modules/
+dist/
+build/
+/.env
+/.env.local
+
+# Vite cache
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Logs
+*.log
 # Logs
 logs
 *.log

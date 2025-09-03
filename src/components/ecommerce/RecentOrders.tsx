@@ -1,5 +1,6 @@
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "../ui/table";
 import Badge from "../ui/badge/Badge";
+import { useGetStatisticsQuery } from "../../redux/api/jobCardApi";
 
 // Define the TypeScript interface for the table rows
 interface Product {
@@ -63,12 +64,16 @@ const tableData: Product[] = [
 ];
 
 export default function RecentOrders() {
+	const { data: stats } = useGetStatisticsQuery();
 	return (
 		<div className='overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 pb-3 pt-4 dark:border-gray-800 dark:bg-white/[0.03] sm:px-6'>
 			<div className='flex flex-col gap-2 mb-4 sm:flex-row sm:items-center sm:justify-between'>
 				<div>
 					<h3 className='text-lg font-semibold text-gray-800 dark:text-white/90'>
 						Recent Jobs Done
+						{typeof stats?.summary?.completed_job_cards === "number"
+							? ` (${stats.summary.completed_job_cards})`
+							: ""}
 					</h3>
 				</div>
 
@@ -125,17 +130,17 @@ export default function RecentOrders() {
 							<TableCell
 								isHeader
 								className='py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400'>
-								Products
+								Customer
 							</TableCell>
 							<TableCell
 								isHeader
 								className='py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400'>
-								Category
+								Jobs
 							</TableCell>
 							<TableCell
 								isHeader
 								className='py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400'>
-								Price
+								Notes
 							</TableCell>
 							<TableCell
 								isHeader
@@ -148,44 +153,71 @@ export default function RecentOrders() {
 					{/* Table Body */}
 
 					<TableBody className='divide-y divide-gray-100 dark:divide-gray-800'>
-						{tableData.map((product) => (
-							<TableRow key={product.id} className=''>
-								<TableCell className='py-3'>
-									<div className='flex items-center gap-3'>
-										<div className='h-[50px] w-[50px] overflow-hidden rounded-md'>
-											<img src={product.image} className='h-[50px] w-[50px]' alt={product.name} />
-										</div>
-										<div>
-											<p className='font-medium text-gray-800 text-theme-sm dark:text-white/90'>
-												{product.name}
-											</p>
-											<span className='text-gray-500 text-theme-xs dark:text-gray-400'>
-												{product.variants}
-											</span>
-										</div>
-									</div>
-								</TableCell>
-								<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
-									{product.price}
-								</TableCell>
-								<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
-									{product.category}
-								</TableCell>
-								<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
-									<Badge
-										size='sm'
-										color={
-											product.status === "Delivered"
-												? "success"
-												: product.status === "Pending"
-												? "warning"
-												: "error"
-										}>
-										{product.status}
-									</Badge>
-								</TableCell>
-							</TableRow>
-						))}
+						{stats?.top_customers
+							? stats.top_customers.map((c: any, idx: number) => (
+									<TableRow key={idx} className=''>
+										<TableCell className='py-3'>
+											<div>
+												<p className='font-medium text-gray-800 text-theme-sm dark:text-white/90'>
+													{c.customerName}
+												</p>
+											</div>
+										</TableCell>
+										<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
+											{c.job_count}
+										</TableCell>
+										<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
+											{/* placeholder */}-
+										</TableCell>
+										<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
+											<Badge size='sm' color='success'>
+												Completed
+											</Badge>
+										</TableCell>
+									</TableRow>
+							  ))
+							: tableData.map((product) => (
+									<TableRow key={product.id} className=''>
+										<TableCell className='py-3'>
+											<div className='flex items-center gap-3'>
+												<div className='h-[50px] w-[50px] overflow-hidden rounded-md'>
+													<img
+														src={product.image}
+														className='h-[50px] w-[50px]'
+														alt={product.name}
+													/>
+												</div>
+												<div>
+													<p className='font-medium text-gray-800 text-theme-sm dark:text-white/90'>
+														{product.name}
+													</p>
+													<span className='text-gray-500 text-theme-xs dark:text-gray-400'>
+														{product.variants}
+													</span>
+												</div>
+											</div>
+										</TableCell>
+										<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
+											{product.price}
+										</TableCell>
+										<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
+											{product.category}
+										</TableCell>
+										<TableCell className='py-3 text-gray-500 text-theme-sm dark:text-gray-400'>
+											<Badge
+												size='sm'
+												color={
+													product.status === "Delivered"
+														? "success"
+														: product.status === "Pending"
+														? "warning"
+														: "error"
+												}>
+												{product.status}
+											</Badge>
+										</TableCell>
+									</TableRow>
+							  ))}
 					</TableBody>
 				</Table>
 			</div>

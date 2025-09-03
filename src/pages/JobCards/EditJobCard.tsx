@@ -30,18 +30,19 @@ export default function EditJobCardPage() {
 		email: "",
 	});
 
-	// Redirect if not admin
-	if (!hasRole(["admin"])) {
-		navigate("/dashboard");
-		return null;
-	}
+	// Redirect non-admin users after render to avoid conditional hook calls
+	useEffect(() => {
+		if (!hasRole(["admin"])) {
+			navigate("/dashboard");
+		}
+	}, [hasRole, navigate]);
 
 	// Populate form when job card data loads
 	useEffect(() => {
 		if (jobCard) {
 			setFormData({
 				jobStatus: jobCard.jobStatus || "",
-				assignedTo: jobCard.assignedTo || "",
+				assignedTo: jobCard.assignedTo?.toString() ?? "1",
 				remarks: jobCard.remarks || "",
 				gpsLocation: jobCard.gpsLocation || "",
 				contactPerson: jobCard.contactPerson || "",
@@ -65,8 +66,10 @@ export default function EditJobCardPage() {
 
 		try {
 			// Follow the same pattern as CreateJobCard - send only the form data
+			// Ensure assignedTo is a number to match JobCardUpdateRequest
 			const updatePayload = {
 				...formData,
+				assignedTo: Number(formData.assignedTo),
 			};
 
 			await updateJobCard({

@@ -53,12 +53,7 @@ const navItems: NavItem[] = [
 				pro: false,
 				requiredRoles: ["admin", "user"],
 			},
-			{
-				name: "Assign Job Card",
-				path: "/dashboard/job-cards/assign",
-				pro: false,
-				requiredRoles: ["admin", "manager"],
-			},
+
 			// Manager - Create and view their jobs
 			{
 				name: "My Job Cards",
@@ -82,18 +77,11 @@ const navItems: NavItem[] = [
 		requiredRoles: ["admin", "manager"],
 		subItems: [
 			{
-				name: "Scan QR Code",
-				path: "/dashboard/scan/qr-code",
-				pro: false,
-				requiredRoles: ["admin", "manager"],
-			},
-			{
 				name: "Manual ID Search",
 				path: "/dashboard/scan/manual",
 				pro: false,
 				requiredRoles: ["admin", "manager"],
 			},
-			{ name: "Batch Scan", path: "/dashboard/scan/batch", pro: false, requiredRoles: ["admin"] },
 		],
 	},
 	// REPORTS (Role-based access)
@@ -127,67 +115,60 @@ const navItems: NavItem[] = [
 		],
 	},
 	// DOWNLOADS (Role-based access)
-	{
-		icon: <DownloadIcon />,
-		name: "Downloads",
-		subItems: [
-			// Admin can download all job cards
-			{
-				name: "Download Job Cards",
-				path: "/dashboard/downloads/job-cards",
-				pro: false,
-				requiredRoles: ["admin", "manager"],
-			},
-			// Manager can download their created job cards
-			{
-				name: "My Job Downloads",
-				path: "/dashboard/downloads/my-jobs",
-				pro: false,
-				requiredRoles: ["manager"],
-			},
-			// User can download viewed job card
-			{
-				name: "Download Viewed Card",
-				path: "/dashboard/downloads/viewed-card",
-				pro: false,
-				requiredRoles: [""],
-			},
-		],
-	},
+	// {
+	// 	icon: <DownloadIcon />,
+	// 	name: "Downloads",
+	// 	subItems: [
+	// 		// Admin can download all job cards
+	// 		{
+	// 			name: "Download Job Cards",
+	// 			path: "/dashboard/downloads/job-cards",
+	// 			pro: false,
+	// 			requiredRoles: ["admin", "manager"],
+	// 		},
+	// 		// Manager can download their created job cards
+	// 		{
+	// 			name: "My Job Downloads",
+	// 			path: "/dashboard/downloads/my-jobs",
+	// 			pro: false,
+	// 			requiredRoles: ["manager"],
+	// 		},
+	// 	],
+	// },
 	// MESSAGING (Admin can send to all, Manager limited)
-	{
-		icon: <EnvelopeIcon />,
-		name: "Messages",
-		requiredRoles: ["admin", "manager"],
-		subItems: [
-			// Admin can message everyone
-			{
-				name: "Send to Users",
-				path: "/dashboard/messages/to-users",
-				pro: false,
-				requiredRoles: ["admin"],
-			},
-			{
-				name: "Send to Managers",
-				path: "/dashboard/messages/to-managers",
-				pro: false,
-				requiredRoles: ["admin"],
-			},
-			{
-				name: "Broadcast Message",
-				path: "/dashboard/messages/broadcast",
-				pro: false,
-				requiredRoles: ["admin"],
-			},
-			// Manager can only message their team
-			{
-				name: "Team Messages",
-				path: "/dashboard/messages/team",
-				pro: false,
-				requiredRoles: ["manager"],
-			},
-		],
-	},
+	// {
+	// 	icon: <EnvelopeIcon />,
+	// 	name: "Messages",
+	// 	requiredRoles: ["admin", "manager"],
+	// 	subItems: [
+	// 		// Admin can message everyone
+	// 		{
+	// 			name: "Send to Users",
+	// 			path: "/dashboard/messages/to-users",
+	// 			pro: false,
+	// 			requiredRoles: ["admin"],
+	// 		},
+	// 		{
+	// 			name: "Send to Managers",
+	// 			path: "/dashboard/messages/to-managers",
+	// 			pro: false,
+	// 			requiredRoles: ["admin"],
+	// 		},
+	// 		{
+	// 			name: "Broadcast Message",
+	// 			path: "/dashboard/messages/broadcast",
+	// 			pro: false,
+	// 			requiredRoles: ["admin"],
+	// 		},
+	// 		// Manager can only message their team
+	// 		{
+	// 			name: "Team Messages",
+	// 			path: "/dashboard/messages/team",
+	// 			pro: false,
+	// 			requiredRoles: ["manager"],
+	// 		},
+	// 	],
+	// },
 	// INSTALLATIONS (Existing functionality)
 	{
 		name: "Installations",

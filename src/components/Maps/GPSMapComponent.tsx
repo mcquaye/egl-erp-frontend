@@ -16,6 +16,7 @@ interface GPSMapComponentProps {
 	lng: number;
 	zoom?: number;
 	height?: string;
+	className?: string;
 }
 
 const GPSMapComponent: React.FC<GPSMapComponentProps> = ({
@@ -23,9 +24,10 @@ const GPSMapComponent: React.FC<GPSMapComponentProps> = ({
 	lng,
 	zoom = 15,
 	height = "400px",
+	className,
 }) => {
 	return (
-		<div style={{ height, width: "100%" }}>
+		<div style={{ height, width: "100%", position: "relative", zIndex: 1 }} className={className}>
 			<MapContainer
 				center={[lat, lng]}
 				zoom={zoom}

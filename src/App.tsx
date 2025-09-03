@@ -137,6 +137,14 @@ export default function App() {
 							}
 						/>
 						<Route
+							path='job-cards/assign'
+							element={
+								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>
+									<AssignJobCard />
+								</RoleGuard>
+							}
+						/>
+						<Route
 							path='job-cards/assign/:id'
 							element={
 								<RoleGuard allowedRoles={["admin"]} fallback={<AccessDenied />}>

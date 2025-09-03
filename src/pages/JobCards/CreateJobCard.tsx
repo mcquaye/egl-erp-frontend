@@ -17,11 +17,11 @@ import {
 	compressImageToBase64,
 	validateImageFile,
 	getBase64SizeInKB,
-	hasImageMetadata,
 } from "../../utils/imageUtils";
+import { BsUpcScan } from "react-icons/bs";
 import { isMetadataStrippingSupported, stripFileMetadata } from "../../utils/metaStripper";
 import { useAuth } from "../../context/AuthContext";
-import BarcodeScanner from "../../components/BarcodeScanner";
+import BarcodeScanner from "../../components/scan/BarcodeScanner";
 
 export default function CreateJobCardPage() {
 	const [serialNumber, setSerialNumber] = useState("");
@@ -31,6 +31,7 @@ export default function CreateJobCardPage() {
 	const [showInstallationData, setShowInstallationData] = useState(false);
 	const [jobCardData, setJobCardData] = useState<Partial<JobCardCreateRequest>>({
 		jobDate: new Date().toISOString().split("T")[0],
+		jobStatus: "Complete",
 	});
 
 	const DEFAULT_CONSENT_MESSAGE = `I hereby confirm that I have purchased one or more Green AC(s) at a reduced purchase price financed through carbon revenues disbursed by the KliK Foundation of Switzerland. In return, I hereby waive my rights to the CO2 emission savings of this AC to the KliK Foundation. I hereby confirm that I did not receive or will apply for any other incentive by any other project funded by carbon or climate finance. I will not move the AC outside of Ghana. In case I sell the AC, I will inform the buyer about this waiver and that it will be passed on automatically to him or her. I agree that my personal data might be used for monitoring purposes and potential periodic monitoring or spot checks during the project period.`;
@@ -351,7 +352,6 @@ export default function CreateJobCardPage() {
 			const payload: JobCardCreateRequest = {
 				serialNumber: searchSerial,
 				jobDate: jobCardData.jobDate!,
-				jobStatus: jobCardData.jobStatus!,
 				jobType: jobCardData.jobType || "Commercial",
 				jobRegion: jobCardData.jobRegion || "Greater Accra",
 				remarks: jobCardData.remarks,
@@ -365,6 +365,8 @@ export default function CreateJobCardPage() {
 				wifiConnection: jobCardData.wifiConnection || false,
 				consent: jobCardData.consent || false,
 				consentMessageOne: jobCardData.consentMessageOne || "N/A",
+
+				jobStatus: "Complete",
 
 				// Include installation data from Oracle
 				username: installation.username || "Unknown",
@@ -386,13 +388,7 @@ export default function CreateJobCardPage() {
 				brand: installation.brand,
 				created_at: new Date(),
 				// Union Type
-				createdBy: user
-					? {
-							id: typeof user.id === "number" ? user.id : Number(user.id) || 1,
-							name: (user as any).name || user.email || "Admin",
-							email: user.email || "admin@egl-com",
-					  }
-					: { id: 1, name: "Admin", email: "admin@egl-com" },
+				createdBy: user?.id,
 				assignedTo: user?.id || 1, // Assign to self by default
 			};
 
@@ -466,8 +462,8 @@ export default function CreateJobCardPage() {
 								type='button'
 								onClick={() => setShowScanner(true)}
 								title='Scan barcode using camera'
-								className='inline-flex items-center gap-2 rounded-lg border px-3 py-2 bg-white text-sm'>
-								Scan
+								className='inline-flex items-center gap-2 rounded-lg border px-2 py-1 bg-white text-sm border-blue-600'>
+								<BsUpcScan color='currentColor' size={26} />
 							</button>
 						</div>
 						<button
@@ -480,11 +476,19 @@ export default function CreateJobCardPage() {
 
 					{showScanner && (
 						<BarcodeScanner
-							onDetected={(value: string) => {
-								setSerialNumber(value);
+							onDetected={(result) => {
+								console.log("Barcode detected:", result.text);
+								console.log("Scan mode:", result.mode);
+								console.log("Timestamp:", new Date(result.timestamp));
+
+								// Set the scanned barcode as the serial number
+								setSerialNumber(result.text);
+
+								// Close scanner immediately
 								setShowScanner(false);
 							}}
 							onClose={() => setShowScanner(false)}
+							defaultMode='auto' // Can be "auto", "manual", or "file"
 						/>
 					)}
 				</div>
@@ -705,6 +709,7 @@ export default function CreateJobCardPage() {
 										lng={currentLocation.lng}
 										zoom={15}
 										height='300px'
+										className='jobcard-map'
 									/>
 								</div>
 								<p className='text-xs text-gray-500 dark:text-gray-400 mt-2 text-center'>
@@ -1546,7 +1551,7 @@ export default function CreateJobCardPage() {
 							</div>
 
 							{/* Consent Checkbox and Message for R290 installations */}
-							{jobCardData.jobStatus === "H024" && (
+							{jobCardData.sub_sub_group === "Split - R290" && (
 								<div className='space-y-4'>
 									<div>
 										<label className='inline-flex items-center'>
