@@ -2,8 +2,13 @@
 node_modules/
 dist/
 build/
+
+# Environment files (all variants)
 /.env
 /.env.local
+/.env.production
+/.env.development
+/.env.staging
 
 # Vite cache
 .vite/
